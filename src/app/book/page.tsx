@@ -14,7 +14,7 @@ const formSchema = z.object({
     phone: z.string().min(8, "Phone number must be valid"),
     email: z.string().email("Invalid email address").optional().or(z.literal("")),
     service: z.enum(["Haircut", "Beard", "Both"]),
-    updates: z.boolean().default(false),
+    updates: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
