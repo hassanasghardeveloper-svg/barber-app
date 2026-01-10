@@ -22,6 +22,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function BookingPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [queueData, setQueueData] = useState<{ number: number; waitTime: string } | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -35,34 +36,47 @@ export default function BookingPage() {
     });
 
     async function onSubmit(values: FormValues) {
-        // Simulate API call and Email Trigger
-        console.log(values);
-
-        // Calculate Mock Data
-        const mockQueueNum = Math.floor(Math.random() * 10) + 40;
-        const mockWait = "35 mins";
-
-        // Trigger Email Notification (Non-blocking)
-        if (values.email) {
-            fetch('/api/notify', {
+        setIsLoading(true);
+        try {
+            // 1. Create Appointment in DB
+            const res = await fetch('/api/appointments', {
                 method: 'POST',
-                body: JSON.stringify({
-                    type: 'confirmation',
-                    email: values.email,
-                    name: values.name,
-                    queueNumber: mockQueueNum,
-                    waitTime: mockWait
-                })
+                body: JSON.stringify(values),
             });
-        }
 
-        setTimeout(() => {
+            if (!res.ok) throw new Error("Failed to book");
+
+            const newAppt = await res.json();
+
+            // 2. Mock Wait Time or Calculate
+            // For simplicity, we just say "35 mins" or calculate based on queue number difference?
+            // Let's stick to a static estimate or simple math for now from client side.
+            const mockWait = "30-45 mins";
+
+            // 3. Trigger Email Notification
+            if (values.email) {
+                fetch('/api/notify', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'confirmation',
+                        email: values.email,
+                        name: values.name,
+                        queueNumber: newAppt.queueNumber,
+                        waitTime: mockWait
+                    })
+                });
+            }
+
             setQueueData({
-                number: mockQueueNum,
+                number: newAppt.queueNumber,
                 waitTime: mockWait,
             });
             setIsSubmitted(true);
-        }, 800);
+        } catch (error) {
+            alert("Booking failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     if (isSubmitted && queueData) {

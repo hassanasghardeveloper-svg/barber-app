@@ -12,11 +12,18 @@ export default function KioskPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here we would sync with the same backend
-        // For now simulating a "Walk-In" added to the queue
 
-        // Simulate API delay
-        setTimeout(() => {
+        try {
+            await fetch('/api/appointments', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    service,
+                    phone: "Walk-in", // Or generate a unique ID
+                    email: ""
+                })
+            });
+
             setStep("SUCCESS");
 
             // Auto reset after 3 seconds for next customer
@@ -25,7 +32,10 @@ export default function KioskPage() {
                 setName("");
                 setService("Haircut");
             }, 4000);
-        }, 500);
+
+        } catch (error) {
+            alert("Failed to join queue");
+        }
     };
 
     if (step === "SUCCESS") {

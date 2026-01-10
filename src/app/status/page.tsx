@@ -10,20 +10,51 @@ export default function StatusPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<any>(null);
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        // Mock API
-        setTimeout(() => {
+        try {
+            const res = await fetch('/api/appointments');
+            const data = await res.json();
+
+            // Find user's appointment
+            // Find *latest* appointment for this phone number (in case of multiple)
+            const myAppts = data.filter((a: any) => a.phone === phone);
+            // Sort by ID desc if not already
+            const myAppt = myAppts.length > 0 ? myAppts[0] : null; // data is sorted desc
+
+            if (!myAppt) {
+                alert("No appointment found for this number.");
+                setIsLoading(false);
+                return;
+            }
+
+            // Find current serving
+            const servingAppt = data.find((a: any) => a.status === 'Serving');
+            const currentServingNum = servingAppt ? servingAppt.queueNumber :
+                data.find((a: any) => a.status === 'Done')?.queueNumber || 0;
+
+            // Calculate people ahead
+            // Filter appointments that are "Waiting" (or "Serving") and have queueNumber < myNumber
+            const ahead = data.filter((a: any) =>
+                (a.status === 'Waiting' || a.status === 'Serving') &&
+                a.queueNumber < myAppt.queueNumber
+            ).length;
+
             setStatus({
-                name: "Hassan Ali",
-                queueNumber: 45,
-                currentServing: 42,
-                estWait: 15, // mins
-                state: "waiting" // waiting, serving, done
+                name: myAppt.name,
+                queueNumber: myAppt.queueNumber,
+                currentServing: currentServingNum || (myAppt.queueNumber - ahead - 1), // fallback
+                estWait: myAppt.status === 'Waiting' ? ahead * 15 : 0,
+                state: myAppt.status.toLowerCase(), // waiting, serving, done
+                peopleAhead: ahead // Store this to display
             });
+        } catch (error) {
+            console.error(error);
+            alert("Error checking status");
+        } finally {
             setIsLoading(false);
-        }, 1200);
+        }
     };
 
     return (

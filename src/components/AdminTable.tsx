@@ -11,6 +11,7 @@ export interface Appointment {
     service: string;
     status: "Waiting" | "Serving" | "Done" | "No-Show";
     waitTime: string;
+    email?: string | null;
 }
 
 interface AdminTableProps {

@@ -1,22 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatsCard from "@/components/StatsCard";
 import AdminTable, { Appointment } from "@/components/AdminTable";
 import { Users, Timer, BadgeCheck, UserX, Armchair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Mock Data
-const INITIAL_DATA: Appointment[] = [
-    { id: 1, queueNumber: 101, name: "Ahmed Ali", phone: "0501234567", service: "Haircut", status: "Serving", waitTime: "0 min" },
-    { id: 2, queueNumber: 102, name: "Khalid Omer", phone: "0559876543", service: "Beard", status: "Waiting", waitTime: "15 min" },
-    { id: 3, queueNumber: 103, name: "John Smith", phone: "0521112222", service: "Both", status: "Waiting", waitTime: "30 min" },
-    { id: 4, queueNumber: 104, name: "Mike Ross", phone: "0504445555", service: "Haircut", status: "Waiting", waitTime: "45 min" },
-    { id: 5, queueNumber: 99, name: "Sarah J", phone: "0506667777", service: "Haircut", status: "Done", waitTime: "-" },
-];
+const AdminDashboard = () => {
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [loading, setLoading] = useState(true);
 
-export default function AdminDashboard() {
-    const [appointments, setAppointments] = useState<Appointment[]>(INITIAL_DATA);
+    const fetchAppointments = async () => {
+        try {
+            const res = await fetch('/api/appointments');
+            const data = await res.json();
+
+            // Transform data to match UI needs
+            // Calculate wait times dynamically for "Waiting" customers
+            let waitingCount = 0;
+            const formatted = data.map((appt: any) => {
+                let waitTime = "-";
+                if (appt.status === "Waiting") {
+                    waitTime = `${waitingCount * 15} min`;
+                    waitingCount++;
+                }
+                return { ...appt, waitTime };
+            });
+            setAppointments(formatted);
+            setLoading(false);
+        } catch (error) {
+            console.error("Failed to fetch", error);
+        }
+    };
+
+    // Poll for updates every 5 seconds
+    useEffect(() => {
+        fetchAppointments();
+        const interval = setInterval(fetchAppointments, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Derived stats
     const todayTotal = appointments.length;
@@ -24,55 +46,75 @@ export default function AdminDashboard() {
     const serving = appointments.find(a => a.status === 'Serving');
     const doneCount = appointments.filter(a => a.status === 'Done').length;
 
-    const handleUpdateStatus = (id: number, status: Appointment["status"]) => {
-        // Optimization: If starting a new service, mark the current "Serving" as "Done" automatically?
-        // Let's keep it manual or smart. Smart is better.
-        let newApps = [...appointments];
+    const handleUpdateStatus = async (id: number, status: Appointment["status"]) => {
+        // Optimistic UI update
+        const oldAppointments = [...appointments];
+        const newAppointments = appointments.map(a => a.id === id ? { ...a, status } : a);
+        setAppointments(newAppointments);
 
-        if (status === 'Serving') {
-            // Mark currently serving as done
-            newApps = newApps.map(a =>
-                (a.status === 'Serving' && a.id !== id) ? { ...a, status: 'Done' } : a
-            );
+        try {
+            // Check if we need to finish currently serving content
+            if (status === 'Serving') {
+                // Find if anyone else is serving and mark done?
+                // For now, let's just update the target.
+                // Ideally backend logic handles this, but we'll do it simple.
+                const currentServing = appointments.find(a => a.status === 'Serving');
+                if (currentServing) {
+                    await fetch(`/api/appointments/${currentServing.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ status: 'Done' })
+                    });
+                }
+            }
+
+            await fetch(`/api/appointments/${id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status })
+            });
+
+            fetchAppointments(); // Re-sync
+        } catch (e) {
+            setAppointments(oldAppointments); // Revert on error
+            alert("Failed to update");
         }
-
-        newApps = newApps.map(a => a.id === id ? { ...a, status } : a);
-        setAppointments(newApps);
     };
 
-    const handleNextCustomer = () => {
-        // Complete current
-        let newApps = appointments.map(a =>
-            a.status === 'Serving' ? { ...a, status: 'Done' as const } : a
-        );
+    const handleNextCustomer = async () => {
+        // 1. Mark current serving as Done
+        if (serving) {
+            await fetch(`/api/appointments/${serving.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'Done' })
+            });
+        }
 
-        // Find next waiting manually
-        const nextIdx = newApps.findIndex(a => a.status === 'Waiting');
+        // 2. Find next waiting
+        const nextCustomer = appointments.find(a => a.status === 'Waiting');
 
-        if (nextIdx !== -1) {
-            newApps[nextIdx] = { ...newApps[nextIdx], status: 'Serving' };
+        if (nextCustomer) {
+            // 3. Mark next as Serving
+            await fetch(`/api/appointments/${nextCustomer.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'Serving' })
+            });
 
-            // Trigger "Your Turn" Email
-            const customer = newApps[nextIdx];
-            if (customer.name !== "Walk-in") {
-                // Mock email
-                const mockEmail = `demo@example.com`;
+            // 4. Send Email
+            if (nextCustomer.email) {
                 fetch('/api/notify', {
                     method: 'POST',
                     body: JSON.stringify({
                         type: 'notification',
-                        email: mockEmail,
-                        name: customer.name,
-                        queueNumber: customer.queueNumber
+                        email: nextCustomer.email,
+                        name: nextCustomer.name,
+                        queueNumber: nextCustomer.queueNumber
                     })
                 });
             }
 
+            fetchAppointments();
         } else {
             alert("No waiting customers!");
         }
-
-        setAppointments(newApps);
     };
 
     return (
@@ -99,7 +141,7 @@ export default function AdminDashboard() {
                         onClick={handleNextCustomer}
                         variant="premium"
                         className="h-auto py-3 px-8 text-lg shadow-xl shadow-amber-500/10 font-bold"
-                        disabled={waitingCount === 0 && !serving}
+                        disabled={loading || (waitingCount === 0 && !serving)}
                     >
                         Next Customer <Armchair className="ml-2 w-5 h-5" />
                     </Button>
@@ -116,9 +158,15 @@ export default function AdminDashboard() {
 
             <div className="space-y-4">
                 <h2 className="text-xl font-bold text-white px-2">Queue Management</h2>
-                <AdminTable appointments={appointments} onUpdateStatus={handleUpdateStatus} />
+                {loading ? (
+                    <div className="text-center p-12 text-slate-500">Loading appointments...</div>
+                ) : (
+                    <AdminTable appointments={appointments} onUpdateStatus={handleUpdateStatus} />
+                )}
             </div>
 
         </main>
     );
-}
+};
+
+export default AdminDashboard;
