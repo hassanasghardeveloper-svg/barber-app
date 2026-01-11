@@ -131,7 +131,7 @@ const AdminDashboard = () => {
         <main className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
 
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900/50 p-6 rounded-3xl border border-slate-800 relative z-30">
                 <div>
                     <h1 className="text-3xl font-heading font-bold text-white">Dashboard</h1>
                     <p className="text-slate-400">Overview of today's queue.</p>
