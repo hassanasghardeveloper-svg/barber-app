@@ -63,24 +63,40 @@ const AdminDashboard = () => {
         setAppointments(newAppointments);
 
         try {
-            // Check if we need to finish currently serving content
-            if (status === 'Serving') {
-                // Find if anyone else is serving and mark done?
-                // For now, let's just update the target.
-                // Ideally backend logic handles this, but we'll do it simple.
-                const currentServing = appointments.find(a => a.status === 'Serving');
-                if (currentServing) {
-                    await fetch(`/api/appointments/${currentServing.id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ status: 'Done' })
-                    });
-                }
-            }
-
+            // Update status in DB
             await fetch(`/api/appointments/${id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ status })
             });
+
+            const targetAppt = appointments.find(a => a.id === id);
+
+            // Trigger Notifications based on status change
+            if (status === 'Serving' && targetAppt?.email) {
+                // "Your turn" email
+                fetch('/api/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'notification',
+                        email: targetAppt.email,
+                        name: targetAppt.name,
+                        queueNumber: targetAppt.queueNumber
+                    })
+                });
+            } else if (status === 'No-Show' && targetAppt?.email) {
+                // "Missed appointment" email
+                fetch('/api/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'cancellation', // New type
+                        email: targetAppt.email,
+                        name: targetAppt.name,
+                        queueNumber: targetAppt.queueNumber
+                    })
+                });
+            }
 
             fetchAppointments(); // Re-sync
         } catch (e) {

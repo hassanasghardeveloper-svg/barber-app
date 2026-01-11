@@ -39,6 +39,20 @@ export async function POST(req: Request) {
                 </div>
             </div>
         `;
+        } else if (type === "cancellation") {
+            subject = `Missed Appointment - #${queueNumber}`;
+            html = `
+             <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                <h1 style="color: #ef4444;">You Missed Your Turn</h1>
+                <p>Hi ${name},</p>
+                <p>We called you but you were not present within 15 minutes.</p>
+                <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+                    <p style="margin: 0; font-size: 18px;">Your appointment has been cancelled.</p>
+                </div>
+                <p>Please book a new appointment if you still wish to visit.</p>
+                 <a href="https://barber-app-5hdo.vercel.app/" style="display: inline-block; background: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Book Again</a>
+            </div>
+        `;
         }
 
         // Since we don't have a real email field in the simplified form, 
