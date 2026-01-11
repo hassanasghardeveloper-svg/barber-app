@@ -17,20 +17,22 @@ export default function StatusPage() {
             const res = await fetch('/api/appointments');
             const data = await res.json();
 
-            // Find user's appointment (search by Phone OR Email)
+            // Find user's appointment (search by Phone OR Email OR Queue Number)
             // Normalize input queries
             const cleanQuery = query.toLowerCase().trim();
+            const isQueueNumber = !isNaN(Number(cleanQuery)) && cleanQuery !== "";
 
             const myAppts = data.filter((a: any) =>
                 (a.phone && a.phone.includes(cleanQuery)) ||
-                (a.email && a.email.toLowerCase().includes(cleanQuery))
+                (a.email && a.email.toLowerCase().includes(cleanQuery)) ||
+                (isQueueNumber && a.queueNumber === Number(cleanQuery))
             );
 
             // Sort by ID desc if not already
             const myAppt = myAppts.length > 0 ? myAppts[0] : null; // data is sorted desc
 
             if (!myAppt) {
-                alert("No appointment found for this phone or email.");
+                alert("No appointment found for this phone, email, or queue number.");
                 setIsLoading(false);
                 return;
             }
@@ -69,7 +71,7 @@ export default function StatusPage() {
 
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-heading font-bold text-white">Live Queue Status</h1>
-                    <p className="text-slate-400">Enter your Phone or Email to check your turn.</p>
+                    <p className="text-slate-400">Enter your Phone, Email, or Queue Number to check your turn.</p>
                 </div>
 
                 {!status ? (
@@ -77,7 +79,7 @@ export default function StatusPage() {
                         <input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Phone or Email..."
+                            placeholder="Phone, Email, or Queue #..."
                             className="flex-grow bg-slate-900 border border-slate-800 rounded-xl px-4 text-white focus:border-amber-500 outline-none h-14 text-lg"
                         />
                         <Button type="submit" variant="premium" className="h-14 w-14 rounded-xl p-0" disabled={isLoading}>
