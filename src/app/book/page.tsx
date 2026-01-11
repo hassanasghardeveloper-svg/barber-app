@@ -114,11 +114,16 @@ export default function BookingPage() {
     }
 
     return (
-        <main className="flex-grow flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
-                <div className="bg-slate-800/30 p-8 border-b border-slate-800 text-center">
-                    <h1 className="text-2xl font-bold text-white font-heading">Secure Your Spot</h1>
-                    <p className="text-slate-400 text-sm mt-1">Join the line from the comfort of your home.</p>
+        <main className="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background Blob for aesthetics */}
+            <div className="absolute top-[-20%] right-[-20%] w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000 pointer-events-none" />
+            <div className="absolute bottom-[-20%] left-[-20%] w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] animate-blob pointer-events-none" />
+
+            <div className="max-w-md w-full glass backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/5 overflow-hidden z-10 animate-in slide-in-from-bottom-4 duration-700">
+                <div className="bg-slate-900/50 p-8 border-b border-white/5 text-center relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
+                    <h1 className="text-3xl font-bold text-white font-heading text-glow">Secure Your Spot</h1>
+                    <p className="text-slate-400 text-sm mt-2">Join the line from the comfort of your home.</p>
                 </div>
 
                 <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-6">

@@ -27,9 +27,7 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link href="/admin/login" className="text-xs text-slate-500 hover:text-slate-300">
-                        Admin
-                    </Link>
+
                     <Link href="/book" className="bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-md text-sm font-bold shadow-lg shadow-amber-500/20 transition-all">
                         Book Appointment
                     </Link>
