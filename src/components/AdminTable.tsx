@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Play, Timer, Ban } from "lucide-react";
+import { CheckCircle, XCircle, Play, Timer, Ban, MessageCircle } from "lucide-react";
 
 export interface Appointment {
     id: number;
@@ -20,6 +20,32 @@ interface AdminTableProps {
 }
 
 export default function AdminTable({ appointments, onUpdateStatus }: AdminTableProps) {
+
+    const sendWhatsapp = (phone: string, name: string, status: string) => {
+        if (!phone) {
+            alert("No phone number for this customer.");
+            return;
+        }
+        // Basic cleanup of phone number: remove non-digits
+        let cleanPhone = phone.replace(/\D/g, '');
+        // If it starts with '0', remove it and add default country code '92' (Pakistan) - strictly assumption as per user context
+        if (cleanPhone.startsWith('0')) {
+            cleanPhone = '92' + cleanPhone.substring(1);
+        }
+
+        let message = "";
+        if (status === 'Waiting') {
+            message = `Hi ${name}, your appointment at Premium Cuts is confirmed. Please be ready!`;
+        } else if (status === 'Serving') {
+            message = `Hi ${name}, it is your turn at Premium Cuts! Please come to the chair immediately.`;
+        } else if (status === 'No-Show') {
+            message = `Hi ${name}, we missed you at Premium Cuts. Your appointment has been cancelled.`;
+        }
+
+        const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <div className="space-y-4">
             {/* Mobile View (Cards) */}
@@ -27,12 +53,23 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                 {appointments.map((apt) => (
                     <div key={apt.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg space-y-3">
                         <div className="flex justify-between items-start">
-                            <div>
+                            <div className="flex-1">
                                 <span className="font-mono text-xl font-bold text-white bg-slate-800 px-2 py-1 rounded inline-block mb-2">
                                     #{apt.queueNumber}
                                 </span>
                                 <h3 className="font-bold text-white text-lg">{apt.name}</h3>
-                                <p className="text-slate-500 text-sm">{apt.phone}</p>
+                                {apt.phone && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="text-slate-500 text-sm">{apt.phone}</p>
+                                        <button
+                                            onClick={() => sendWhatsapp(apt.phone, apt.name, 'Serving')}
+                                            className="p-1 bg-green-500/10 rounded-full text-green-500 hover:bg-green-500/20"
+                                            title="Message on WhatsApp"
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <div className={`px-2 py-1 rounded-lg text-xs font-bold border uppercase tracking-wider
                                 ${apt.status === 'Waiting' ? 'text-slate-400 border-slate-700 bg-slate-800' :
@@ -56,7 +93,10 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                     <Button
                                         size="sm"
                                         variant="premium"
-                                        onClick={() => onUpdateStatus(apt.id, 'Serving')}
+                                        onClick={() => {
+                                            onUpdateStatus(apt.id, 'Serving');
+                                            // sendWhatsapp(apt.phone, apt.name, 'Serving'); // Optional: Auto open? Maybe annoying. Let's keep manual button for now.
+                                        }}
                                         className="flex-1 bg-amber-500 hover:bg-amber-400 text-black border-none"
                                     >
                                         Start <Play className="w-3 h-3 ml-1 fill-black" />
@@ -113,7 +153,18 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-white text-base">{apt.name}</div>
-                                        <div className="text-xs text-slate-500 mt-0.5">{apt.phone}</div>
+                                        <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                                            {apt.phone}
+                                            {apt.phone && (
+                                                <button
+                                                    onClick={() => sendWhatsapp(apt.phone, apt.name, 'Serving')}
+                                                    className="hover:text-green-500 transition-colors"
+                                                    title="Message on WhatsApp"
+                                                >
+                                                    <MessageCircle className="w-3.5 h-3.5" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border
