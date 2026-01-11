@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
     try {
         const appointments = await prisma.appointment.findMany({
@@ -17,6 +19,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
+        console.log("Appointment POST received:", body);
         const { name, phone, service, email } = body;
 
         // Calculate queue number (max + 1)
@@ -24,6 +27,7 @@ export async function POST(req: Request) {
             orderBy: { queueNumber: 'desc' }
         });
         const nextQueueNum = (lastAppt?.queueNumber || 99) + 1;
+        console.log("Calculated queue number:", nextQueueNum);
 
         const newAppointment = await prisma.appointment.create({
             data: {
@@ -35,18 +39,13 @@ export async function POST(req: Request) {
                 status: 'Waiting'
             }
         });
+        console.log("Appointment created in DB:", newAppointment);
 
-        // Trigger email if provided
-        if (email) {
-            // We can call our own notify API or just do it here. 
-            // Calling the internal function from lib/mail is better than a fetch loop.
-            // But for consistency with previous code, let's keep it simple or just rely on the notify route.
-            // Actually, the notify route is separate. Let's just return success and let client call notify? 
-            // No, server-side is better.
-        }
+        // Trigger email if provided (This comment was here before, logic is separate)
 
         return NextResponse.json(newAppointment);
-    } catch (error) {
-        return NextResponse.json({ error: "Error creating appointment" }, { status: 500 });
+    } catch (error: any) {
+        console.error("Error creating appointment:", error);
+        return NextResponse.json({ error: "Error creating appointment", details: error.message }, { status: 500 });
     }
 }

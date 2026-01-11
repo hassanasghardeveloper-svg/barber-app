@@ -15,6 +15,15 @@ const AdminDashboard = () => {
             const res = await fetch('/api/appointments');
             const data = await res.json();
 
+            if (!Array.isArray(data)) {
+                console.error("API returned non-array data:", data);
+                // If specific error from API
+                if (data.error) {
+                    console.error("Server Error:", data.error);
+                }
+                return;
+            }
+
             // Transform data to match UI needs
             // Calculate wait times dynamically for "Waiting" customers
             let waitingCount = 0;
@@ -27,9 +36,10 @@ const AdminDashboard = () => {
                 return { ...appt, waitTime };
             });
             setAppointments(formatted);
-            setLoading(false);
         } catch (error) {
             console.error("Failed to fetch", error);
+        } finally {
+            setLoading(false);
         }
     };
 
