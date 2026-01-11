@@ -11,8 +11,13 @@ import clsx from "clsx";
 
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
-    phone: z.string().min(8, "Phone number must be valid"),
-    email: z.string().email("Invalid email address").optional().or(z.literal("")),
+    phone: z.string().optional(),
+    email: z.string()
+        .min(1, "Email is required for updates")
+        .email("Invalid email address")
+        .refine((email) => email.toLowerCase().endsWith("@gmail.com") || email.toLowerCase().endsWith("@outlook.com"), {
+            message: "Only @gmail.com or @outlook.com addresses are accepted",
+        }),
     service: z.enum(["Haircut", "Beard", "Both"]),
     updates: z.boolean().optional(),
 });
@@ -41,6 +46,7 @@ export default function BookingPage() {
             // 1. Create Appointment in DB
             const res = await fetch('/api/appointments', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values),
             });
 
@@ -48,24 +54,21 @@ export default function BookingPage() {
 
             const newAppt = await res.json();
 
-            // 2. Mock Wait Time or Calculate
-            // For simplicity, we just say "35 mins" or calculate based on queue number difference?
-            // Let's stick to a static estimate or simple math for now from client side.
+            // 2. Mock Wait Time
             const mockWait = "30-45 mins";
 
-            // 3. Trigger Email Notification
-            if (values.email) {
-                fetch('/api/notify', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        type: 'confirmation',
-                        email: values.email,
-                        name: values.name,
-                        queueNumber: newAppt.queueNumber,
-                        waitTime: mockWait
-                    })
-                });
-            }
+            // 3. Trigger Email Notification (Always sent since email is required)
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'confirmation',
+                    email: values.email,
+                    name: values.name,
+                    queueNumber: newAppt.queueNumber,
+                    waitTime: mockWait
+                })
+            });
 
             setQueueData({
                 number: newAppt.queueNumber,
@@ -87,7 +90,7 @@ export default function BookingPage() {
                         <CheckCircle2 className="w-10 h-10 text-green-500" />
                     </div>
                     <h2 className="text-3xl font-heading font-bold text-white mb-2">You're Ordered!</h2>
-                    <p className="text-slate-400 mb-8">We've saved your spot. Please arrive shortly.</p>
+                    <p className="text-slate-400 mb-8">Confirmation sent to your email.</p>
 
                     <div className="grid grid-cols-2 gap-4 mb-8">
                         <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800">
@@ -129,7 +132,7 @@ export default function BookingPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-6">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300 ml-1">Full Name</label>
+                            <label className="text-sm font-medium text-slate-300 ml-1">Full Name <span className="text-amber-500">*</span></label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                                 <input
@@ -145,7 +148,7 @@ export default function BookingPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300 ml-1">Phone Number</label>
+                            <label className="text-sm font-medium text-slate-300 ml-1">Phone Number <span className="text-slate-600 font-normal">(Optional)</span></label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                                 <input
@@ -161,14 +164,14 @@ export default function BookingPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300 ml-1">Email <span className="text-slate-600 font-normal">(Optional for updates)</span></label>
+                            <label className="text-sm font-medium text-slate-300 ml-1">Email <span className="text-amber-500">*</span></label>
                             <div className="relative">
                                 <User className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                                 <input
                                     {...form.register("email")}
                                     type="email"
                                     className="w-full bg-slate-950 border border-slate-800 rounded-xl h-12 pl-10 pr-3 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all placeholder:text-slate-600"
-                                    placeholder="you@email.com"
+                                    placeholder="you@gmail.com"
                                 />
                             </div>
                             {form.formState.errors.email && (
