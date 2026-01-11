@@ -50,7 +50,10 @@ export default function BookingPage() {
                 body: JSON.stringify(values),
             });
 
-            if (!res.ok) throw new Error("Failed to book");
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Failed to book");
+            }
 
             const newAppt = await res.json();
 
@@ -75,8 +78,8 @@ export default function BookingPage() {
                 waitTime: mockWait,
             });
             setIsSubmitted(true);
-        } catch (error) {
-            alert("Booking failed. Please try again.");
+        } catch (error: any) {
+            alert(error.message || "Booking failed. Please try again.");
         } finally {
             setIsLoading(false);
         }
