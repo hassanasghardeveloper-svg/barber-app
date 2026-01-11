@@ -24,7 +24,7 @@ export async function POST(req: Request) {
                     <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold; color: #3b82f6;">${waitTime}</p>
                 </div>
                 <p>Please arrive 10 minutes before your turn.</p>
-                <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/status" style="display: inline-block; background: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Check Live Status</a>
+                <a href="https://barber-app-5hdo.vercel.app/status" style="display: inline-block; background: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Check Live Status</a>
             </div>
         `;
         } else if (type === "notification") {
