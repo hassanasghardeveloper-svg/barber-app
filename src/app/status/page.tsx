@@ -6,7 +6,7 @@ import { Search, Loader2, User, Clock, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function StatusPage() {
-    const [phone, setPhone] = useState("");
+    const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<any>(null);
 
@@ -17,14 +17,20 @@ export default function StatusPage() {
             const res = await fetch('/api/appointments');
             const data = await res.json();
 
-            // Find user's appointment
-            // Find *latest* appointment for this phone number (in case of multiple)
-            const myAppts = data.filter((a: any) => a.phone === phone);
+            // Find user's appointment (search by Phone OR Email)
+            // Normalize input queries
+            const cleanQuery = query.toLowerCase().trim();
+
+            const myAppts = data.filter((a: any) =>
+                (a.phone && a.phone.includes(cleanQuery)) ||
+                (a.email && a.email.toLowerCase().includes(cleanQuery))
+            );
+
             // Sort by ID desc if not already
             const myAppt = myAppts.length > 0 ? myAppts[0] : null; // data is sorted desc
 
             if (!myAppt) {
-                alert("No appointment found for this number.");
+                alert("No appointment found for this phone or email.");
                 setIsLoading(false);
                 return;
             }
@@ -63,15 +69,15 @@ export default function StatusPage() {
 
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-heading font-bold text-white">Live Queue Status</h1>
-                    <p className="text-slate-400">Enter your phone number to check your turn.</p>
+                    <p className="text-slate-400">Enter your Phone or Email to check your turn.</p>
                 </div>
 
                 {!status ? (
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <input
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="05x..."
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Phone or Email..."
                             className="flex-grow bg-slate-900 border border-slate-800 rounded-xl px-4 text-white focus:border-amber-500 outline-none h-14 text-lg"
                         />
                         <Button type="submit" variant="premium" className="h-14 w-14 rounded-xl p-0" disabled={isLoading}>
