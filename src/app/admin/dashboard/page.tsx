@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import StatsCard from "@/components/StatsCard";
 import AdminTable, { Appointment } from "@/components/AdminTable";
 import ServicesManager from "@/components/ServicesManager";
-import { Users, Timer, BadgeCheck, UserX, Armchair } from "lucide-react";
+import { Users, Timer, BadgeCheck, UserX, Armchair, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const AdminDashboard = () => {
@@ -16,27 +16,21 @@ const AdminDashboard = () => {
             const res = await fetch('/api/appointments');
             const data = await res.json();
 
-            if (!Array.isArray(data)) {
-                console.error("API returned non-array data:", data);
-                // If specific error from API
-                if (data.error) {
-                    console.error("Server Error:", data.error);
-                }
-                return;
-            }
+            if (Array.isArray(data)) {
+                // Sort by Date then Time
+                const sorted = data.sort((a: any, b: any) => {
+                    const dateA = a.appointmentDate || '9999-99-99';
+                    const dateB = b.appointmentDate || '9999-99-99';
+                    if (dateA !== dateB) return dateA.localeCompare(dateB);
+                    return (a.appointmentTime || '23:59').localeCompare(b.appointmentTime || '23:59');
+                });
 
-            // Transform data to match UI needs
-            // Calculate wait times dynamically for "Waiting" customers
-            let waitingCount = 0;
-            const formatted = data.map((appt: any) => {
-                let waitTime = "-";
-                if (appt.status === "Waiting") {
-                    waitTime = `${waitingCount * 15} min`;
-                    waitingCount++;
-                }
-                return { ...appt, waitTime };
-            });
-            setAppointments(formatted);
+                // We want to show 'Serving' at top, then 'Scheduled'/'Waiting', then others
+                // Actually, for the table, we just want pending stuff mostly.
+                // Let's keep specific statuses active
+                const active = sorted; // We can filter here if needed, but the user might want to see today's history too.
+                setAppointments(active);
+            }
         } catch (error) {
             console.error("Failed to fetch", error);
         } finally {
@@ -53,7 +47,7 @@ const AdminDashboard = () => {
 
     // Derived stats
     const todayTotal = appointments.length;
-    const waitingCount = appointments.filter(a => a.status === 'Waiting').length;
+    const waitingCount = appointments.filter(a => a.status === 'Waiting' || a.status === 'Scheduled').length;
     const serving = appointments.find(a => a.status === 'Serving');
     const doneCount = appointments.filter(a => a.status === 'Done').length;
 
@@ -86,12 +80,11 @@ const AdminDashboard = () => {
                     })
                 });
             } else if (status === 'No-Show' && targetAppt?.email) {
-                // "Missed appointment" email
                 fetch('/api/notify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        type: 'cancellation', // New type
+                        type: 'cancellation',
                         email: targetAppt.email,
                         name: targetAppt.name,
                         queueNumber: targetAppt.queueNumber
@@ -115,8 +108,8 @@ const AdminDashboard = () => {
             });
         }
 
-        // 2. Find next waiting
-        const nextCustomer = appointments.find(a => a.status === 'Waiting');
+        // 2. Find next waiting (Scheduled or Waiting) - The list is already sorted by time
+        const nextCustomer = appointments.find(a => a.status === 'Waiting' || a.status === 'Scheduled');
 
         if (nextCustomer) {
             // 3. Mark next as Serving
@@ -140,13 +133,11 @@ const AdminDashboard = () => {
 
             fetchAppointments();
         } else {
-            alert("No waiting customers!");
+            alert("No upcoming appointments!");
         }
     };
 
-    const [activeTab, setActiveTab] = useState<'queue' | 'services' | 'settings'>('queue');
-
-    // ... (rest of the handleUpdateStatus and handleNextCustomer logic)
+    const [activeTab, setActiveTab] = useState<'schedule' | 'services' | 'settings'>('schedule');
 
     return (
         <main className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
@@ -155,15 +146,15 @@ const AdminDashboard = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900/50 p-6 rounded-3xl border border-slate-800 relative z-30">
                 <div>
                     <h1 className="text-3xl font-heading font-bold text-white">Dashboard</h1>
-                    <p className="text-slate-400">Overview of today's queue.</p>
+                    <p className="text-slate-400">Manage today's appointments.</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                     {/* Current Serving Indicator */}
                     <div className="flex items-center gap-4 bg-slate-950 px-6 py-3 rounded-2xl border border-slate-800 shadow-inner">
                         <div className="text-right">
-                            <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Serving</p>
-                            <p className="text-2xl font-bold text-amber-500 font-mono">#{serving?.queueNumber || '--'}</p>
+                            <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">{serving ? 'Now Serving' : 'Chair Empty'}</p>
+                            <p className="text-xl font-bold text-amber-500">{serving?.name || '--'}</p>
                         </div>
                         <div className={`w-3 h-3 rounded-full ${serving ? 'bg-amber-500 animate-pulse' : 'bg-slate-700'}`} />
                     </div>
@@ -174,7 +165,7 @@ const AdminDashboard = () => {
                         className="h-auto py-3 px-8 text-lg shadow-xl shadow-amber-500/10 font-bold"
                         disabled={loading || (waitingCount === 0 && !serving)}
                     >
-                        Next Customer <Armchair className="ml-2 w-5 h-5" />
+                        Next Client <Armchair className="ml-2 w-5 h-5" />
                     </Button>
                 </div>
             </div>
@@ -182,9 +173,9 @@ const AdminDashboard = () => {
             {/* Navigation Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-2">
                 {[
-                    { id: 'queue', label: 'Live Queue', icon: Timer },
+                    { id: 'schedule', label: 'Schedule', icon: CalendarCheck },
                     { id: 'services', label: 'Services Menu', icon: BadgeCheck },
-                    { id: 'settings', label: 'Settings', icon: UserX } // Using UserX as placeholder, update if needed
+                    { id: 'settings', label: 'Settings', icon: UserX }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -201,22 +192,22 @@ const AdminDashboard = () => {
             </div>
 
             {/* Tab Content */}
-            {activeTab === 'queue' && (
+            {activeTab === 'schedule' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <StatsCard title="Waiting" value={waitingCount} icon={Timer} trend="Peak time" trendUp={false} color="amber" />
+                        <StatsCard title="Scheduled" value={waitingCount} icon={CalendarCheck} trend="Upcoming" trendUp={true} color="amber" />
                         <StatsCard title="Completed" value={doneCount} icon={BadgeCheck} color="green" />
-                        <StatsCard title="Total Visits" value={todayTotal} icon={Users} trend="+12%" trendUp={true} color="blue" />
+                        <StatsCard title="Total Booked" value={todayTotal} icon={Users} trend="Today" trendUp={true} color="blue" />
                         <StatsCard title="No-Shows" value={0} icon={UserX} trend="Low" trendUp={true} />
                     </div>
 
                     <div className="space-y-4">
-                        <h2 className="text-xl font-bold text-white px-2">Queue Management</h2>
+                        <h2 className="text-xl font-bold text-white px-2">Upcoming Appointments</h2>
                         {loading ? (
-                            <div className="text-center p-12 text-slate-500">Loading appointments...</div>
+                            <div className="text-center p-12 text-slate-500">Loading schedule...</div>
                         ) : (
-                            <AdminTable appointments={appointments} onUpdateStatus={handleUpdateStatus} />
+                            <AdminTable appointments={appointments.filter(a => a.status !== 'Done' && a.status !== 'No-Show')} onUpdateStatus={handleUpdateStatus} />
                         )}
                     </div>
                 </div>

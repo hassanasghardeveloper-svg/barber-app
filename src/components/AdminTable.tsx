@@ -1,16 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Play, Timer, Ban, MessageCircle } from "lucide-react";
+import { CheckCircle, XCircle, Play, Timer, Ban, MessageCircle, CalendarClock } from "lucide-react";
+import { format, parseISO, isToday, isTomorrow } from "date-fns";
 
 export interface Appointment {
     id: number;
-    queueNumber: number;
+    queueNumber?: number;
     name: string;
     phone: string;
     service: string;
-    status: "Waiting" | "Serving" | "Done" | "No-Show";
-    waitTime: string;
+    status: "Scheduled" | "Waiting" | "Serving" | "Done" | "No-Show";
+    appointmentDate?: string; // YYYY-MM-DD
+    appointmentTime?: string; // HH:mm
     email?: string | null;
     gender?: string | null;
     barber?: string | null;
@@ -23,21 +25,19 @@ interface AdminTableProps {
 
 export default function AdminTable({ appointments, onUpdateStatus }: AdminTableProps) {
 
-    const sendWhatsapp = (phone: string, name: string, status: string) => {
+    const sendWhatsapp = (phone: string, name: string, status: string, time?: string) => {
         if (!phone) {
             alert("No phone number for this customer.");
             return;
         }
-        // Basic cleanup of phone number: remove non-digits
         let cleanPhone = phone.replace(/\D/g, '');
-        // If it starts with '0', remove it and add default country code '92' (Pakistan) - strictly assumption as per user context
         if (cleanPhone.startsWith('0')) {
             cleanPhone = '92' + cleanPhone.substring(1);
         }
 
         let message = "";
-        if (status === 'Waiting') {
-            message = `Hi ${name}, your appointment at Premium Cuts is confirmed. Please be ready!`;
+        if (status === 'Scheduled' || status === 'Waiting') {
+            message = `Hi ${name}, your appointment at Premium Cuts is confirmed for ${time || 'today'}. Please be on time!`;
         } else if (status === 'Serving') {
             message = `Hi ${name}, it is your turn at Premium Cuts! Please come to the chair immediately.`;
         } else if (status === 'No-Show') {
@@ -48,6 +48,21 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
         window.open(url, '_blank');
     };
 
+    const formatApptTime = (dateStr?: string, timeStr?: string) => {
+        if (!dateStr || !timeStr) return "Walk-in / Queue";
+        try {
+            const date = parseISO(dateStr);
+            let prefix = "";
+            if (isToday(date)) prefix = "Today";
+            else if (isTomorrow(date)) prefix = "Tomorrow";
+            else prefix = format(date, "MMM d");
+
+            return `${prefix} @ ${timeStr}`;
+        } catch (e) {
+            return `${dateStr} ${timeStr}`;
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Mobile View (Cards) */}
@@ -56,19 +71,21 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                     <div key={apt.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg space-y-3">
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
-                                <span className="font-mono text-xl font-bold text-white bg-slate-800 px-2 py-1 rounded inline-block mb-2">
-                                    #{apt.queueNumber}
-                                </span>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-mono text-sm font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded inline-block">
+                                        {formatApptTime(apt.appointmentDate, apt.appointmentTime)}
+                                    </span>
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-bold text-white text-lg">{apt.name}</h3>
-                                    {apt.gender === 'Female' && <span className="text-pink-400 text-xs bg-pink-500/10 px-1.5 py-0.5 rounded">👩</span>}
-                                    {apt.gender === 'Male' && <span className="text-blue-400 text-xs bg-blue-500/10 px-1.5 py-0.5 rounded">👨</span>}
+                                    {apt.gender === 'Female' && <span className="text-pink-400 text-xs bg-pink-500/10 px-1.5 py-0.5 rounded">👩 women</span>}
+                                    {apt.gender === 'Male' && <span className="text-blue-400 text-xs bg-blue-500/10 px-1.5 py-0.5 rounded">👨 men</span>}
                                 </div>
                                 {apt.phone && (
                                     <div className="flex items-center gap-2 mt-1">
                                         <p className="text-slate-500 text-sm">{apt.phone}</p>
                                         <button
-                                            onClick={() => sendWhatsapp(apt.phone, apt.name, 'Serving')}
+                                            onClick={() => sendWhatsapp(apt.phone, apt.name, 'Serving', apt.appointmentTime)}
                                             className="p-1 bg-green-500/10 rounded-full text-green-500 hover:bg-green-500/20"
                                             title="Message on WhatsApp"
                                         >
@@ -78,7 +95,7 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                 )}
                             </div>
                             <div className={`px-2 py-1 rounded-lg text-xs font-bold border uppercase tracking-wider
-                                ${apt.status === 'Waiting' ? 'text-slate-400 border-slate-700 bg-slate-800' :
+                                ${apt.status === 'Scheduled' || apt.status === 'Waiting' ? 'text-slate-400 border-slate-700 bg-slate-800' :
                                     apt.status === 'Serving' ? 'text-amber-500 border-amber-500/20 bg-amber-500/10 animate-pulse' :
                                         apt.status === 'Done' ? 'text-green-500 border-green-500/20 bg-green-500/10' :
                                             'text-red-500 border-red-500/20 bg-red-500/10'}`}>
@@ -93,19 +110,15 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                 </span>
                                 {apt.barber && <span className="text-xs text-slate-500">Barber: <span className="text-amber-500">{apt.barber}</span></span>}
                             </div>
-                            <span className="text-slate-500 text-xs">Wait: {apt.waitTime}</span>
                         </div>
 
                         <div className="flex gap-2 pt-2">
-                            {apt.status === 'Waiting' && (
+                            {(apt.status === 'Waiting' || apt.status === 'Scheduled') && (
                                 <>
                                     <Button
                                         size="sm"
                                         variant="premium"
-                                        onClick={() => {
-                                            onUpdateStatus(apt.id, 'Serving');
-                                            // sendWhatsapp(apt.phone, apt.name, 'Serving'); // Optional: Auto open? Maybe annoying. Let's keep manual button for now.
-                                        }}
+                                        onClick={() => onUpdateStatus(apt.id, 'Serving')}
                                         className="flex-1 bg-amber-500 hover:bg-amber-400 text-black border-none"
                                     >
                                         Start <Play className="w-3 h-3 ml-1 fill-black" />
@@ -145,7 +158,7 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                     <table className="w-full text-sm text-left text-slate-400">
                         <thead className="text-xs text-slate-500 uppercase bg-slate-950/50 border-b border-slate-800">
                             <tr>
-                                <th className="px-6 py-4 font-semibold">Queue #</th>
+                                <th className="px-6 py-4 font-semibold">Time</th>
                                 <th className="px-6 py-4 font-semibold">Customer</th>
                                 <th className="px-6 py-4 font-semibold">Service</th>
                                 <th className="px-6 py-4 font-semibold">Status</th>
@@ -156,9 +169,12 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                             {appointments.map((apt) => (
                                 <tr key={apt.id} className="hover:bg-slate-800/30 transition-colors">
                                     <td className="px-6 py-4">
-                                        <span className="font-mono text-lg font-bold text-white bg-slate-800 px-2 py-1 rounded">
-                                            #{apt.queueNumber}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <CalendarClock className="w-4 h-4 text-slate-600" />
+                                            <span className="font-mono text-base font-bold text-white">
+                                                {formatApptTime(apt.appointmentDate, apt.appointmentTime)}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
@@ -170,7 +186,7 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                             {apt.phone}
                                             {apt.phone && (
                                                 <button
-                                                    onClick={() => sendWhatsapp(apt.phone, apt.name, 'Serving')}
+                                                    onClick={() => sendWhatsapp(apt.phone, apt.name, 'Serving', apt.appointmentTime)}
                                                     className="hover:text-green-500 transition-colors"
                                                     title="Message on WhatsApp"
                                                 >
@@ -182,8 +198,8 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1 items-start">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border
-                                                ${apt.service === 'Haircut' ? 'bg-blue-500/5 text-blue-400 border-blue-500/10' :
-                                                    apt.service === 'Beard' ? 'bg-amber-500/5 text-amber-400 border-amber-500/10' :
+                                                ${apt.service.includes('Haircut') ? 'bg-blue-500/5 text-blue-400 border-blue-500/10' :
+                                                    apt.service.includes('Beard') ? 'bg-amber-500/5 text-amber-400 border-amber-500/10' :
                                                         'bg-purple-500/5 text-purple-400 border-purple-500/10'}`}>
                                                 {apt.service}
                                             </span>
@@ -192,11 +208,11 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className={`flex items-center gap-2 font-medium
-                                            ${apt.status === 'Waiting' ? 'text-slate-400' :
+                                            ${apt.status === 'Waiting' || apt.status === 'Scheduled' ? 'text-slate-400' :
                                                 apt.status === 'Serving' ? 'text-amber-500 animate-pulse' :
                                                     apt.status === 'Done' ? 'text-green-500' : 'text-red-500'}`}>
 
-                                            {apt.status === 'Waiting' && <Timer className="w-4 h-4" />}
+                                            {(apt.status === 'Waiting' || apt.status === 'Scheduled') && <Timer className="w-4 h-4" />}
                                             {apt.status === 'Serving' && <ScissorsIcon className="w-4 h-4" />}
                                             {apt.status === 'Done' && <CheckCircle className="w-4 h-4" />}
                                             {apt.status === 'No-Show' && <Ban className="w-4 h-4" />}
@@ -206,7 +222,7 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
-                                            {apt.status === 'Waiting' && (
+                                            {(apt.status === 'Waiting' || apt.status === 'Scheduled') && (
                                                 <>
                                                     <Button
                                                         size="sm"
@@ -247,7 +263,7 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                             <div className="p-3 bg-slate-800 rounded-full">
                                                 <Timer className="w-6 h-6 text-slate-600" />
                                             </div>
-                                            <p>No appointments in queue.</p>
+                                            <p>No appointments scheduled.</p>
                                         </div>
                                     </td>
                                 </tr>
