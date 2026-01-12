@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Check, User, Phone, CheckCircle2, Scissors, Sparkles, Clock, CalendarX, AlertCircle } from "lucide-react";
+import { Check, User, Phone, CheckCircle2, Scissors, Sparkles, Clock, CalendarX, AlertCircle, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
 import { motion, AnimatePresence, Variants } from "framer-motion";
@@ -49,6 +49,7 @@ export default function BookingPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isShopClosed, setIsShopClosed] = useState(false);
     const [loadingSettings, setLoadingSettings] = useState(true);
+    const [shopPhone, setShopPhone] = useState("");
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -67,6 +68,7 @@ export default function BookingPage() {
                 const res = await fetch('/api/settings');
                 if (res.ok) {
                     const settings = await res.json();
+                    if (settings.phone) setShopPhone(settings.phone);
 
                     // Check if manually closed
                     if (settings.isQueueOpen === false) {
@@ -240,6 +242,18 @@ export default function BookingPage() {
                     </div>
 
                     <div className="space-y-3">
+                        {shopPhone && (
+                            <Button
+                                onClick={() => {
+                                    const message = `Hi, I just booked appointment #${queueData.number} for ${form.getValues("name")}.`;
+                                    window.open(`https://wa.me/${shopPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                                }}
+                                className="w-full h-14 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl shadow-lg shadow-green-500/20"
+                            >
+                                <MessageCircle className="w-5 h-5 mr-2" />
+                                Send to WhatsApp
+                            </Button>
+                        )}
                         <Link href="/status" className="block w-full">
                             <Button className="w-full h-14 text-base font-bold rounded-xl shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]" variant="premium">
                                 Track Live Status
