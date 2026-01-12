@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${inter.variable} ${outfit.variable} font-sans antialiased min-h-screen bg-slate-950 text-slate-50 flex flex-col`}>
+            <body className={`${inter.variable} ${outfit.variable} font-sans antialiased min-h-screen bg-slate-950 text-slate-50 flex flex-col bg-noise`}>
                 <Navbar />
                 <div className="flex-grow flex flex-col pb-20 md:pb-0">
                     {children}

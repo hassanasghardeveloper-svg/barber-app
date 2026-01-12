@@ -6,8 +6,9 @@ export default function Home() {
         <main className="flex-grow flex flex-col items-center justify-center relative overflow-hidden p-6 text-center">
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] left-[20%] w-[60vw] h-[60vw] bg-blue-500/5 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[20%] w-[60vw] h-[60vw] bg-amber-500/5 rounded-full blur-[120px]" />
+                <div className="absolute top-[-10%] left-[20%] w-[60vw] h-[60vw] bg-blue-500/5 rounded-full blur-[120px] animate-blob" />
+                <div className="absolute bottom-[-10%] right-[20%] w-[60vw] h-[60vw] bg-amber-500/5 rounded-full blur-[120px] animate-blob animation-delay-2000" />
+                <div className="absolute bottom-[20%] left-[10%] w-[40vw] h-[40vw] bg-purple-500/5 rounded-full blur-[120px] animate-blob animation-delay-4000" />
             </div>
 
             <div className="z-10 max-w-3xl space-y-8 animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-8">
