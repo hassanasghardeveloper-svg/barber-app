@@ -4,7 +4,7 @@ import { Star, Clock, MapPin, Phone, Scissors, Trophy, User, Calendar } from "lu
 
 export default function Home() {
     return (
-        <main className="flex-col bg-slate-950">
+        <main className="flex-col bg-neutral-950">
 
             {/* --- HERO SECTION --- */}
             <section className="relative h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
@@ -15,7 +15,7 @@ export default function Home() {
                         alt="Barber Shop Background"
                         className="w-full h-full object-cover opacity-40 grayscale"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
                 </div>
 
                 <div className="relative z-10 text-center space-y-6 px-4 max-w-5xl mx-auto mt-20">
@@ -30,7 +30,7 @@ export default function Home() {
                         </span>
                     </h1>
 
-                    <p className="text-slate-300 text-lg md:text-2xl font-light max-w-2xl mx-auto tracking-wide">
+                    <p className="text-neutral-300 text-lg md:text-2xl font-light max-w-2xl mx-auto tracking-wide">
                         Where traditional mastery meets modern luxury.
                     </p>
 
@@ -49,8 +49,8 @@ export default function Home() {
                 </div>
 
                 {/* Info Strip */}
-                <div className="absolute bottom-0 w-full bg-slate-900/80 backdrop-blur-md border-t border-white/10 py-6 hidden md:block">
-                    <div className="container mx-auto flex justify-center gap-16 text-slate-300 text-sm font-bold uppercase tracking-widest">
+                <div className="absolute bottom-0 w-full bg-neutral-900/80 backdrop-blur-md border-t border-white/10 py-6 hidden md:block">
+                    <div className="container mx-auto flex justify-center gap-16 text-neutral-300 text-sm font-bold uppercase tracking-widest">
                         <div className="flex items-center gap-3">
                             <MapPin className="text-amber-500 w-5 h-5" /> Paris Road, Sialkot
                         </div>
@@ -65,7 +65,7 @@ export default function Home() {
             </section>
 
             {/* --- TEAM CIRCLES --- */}
-            <section className="py-24 bg-slate-950 text-center">
+            <section className="py-24 bg-neutral-950 text-center">
                 <div className="container mx-auto px-6">
                     <h2 className="text-amber-500 font-bold tracking-widest uppercase mb-4 text-sm">Our Talent</h2>
                     <h3 className="text-4xl text-white font-bold font-heading mb-16 uppercase">Meet the Masters</h3>
@@ -93,9 +93,9 @@ export default function Home() {
             </section>
 
             {/* --- LIGHT SERVICES SECTION (The "Torn Paper" Effect) --- */}
-            <section className="py-32 bg-[#F5F5F0] text-slate-900 relative">
+            <section className="py-32 bg-[#F5F5F0] text-neutral-900 relative">
                 {/* Top Jagged Edge (CSS substitute) */}
-                <div className="absolute top-0 left-0 w-full h-16 bg-slate-950" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 20%)" }}></div>
+                <div className="absolute top-0 left-0 w-full h-16 bg-neutral-950" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 20%)" }}></div>
 
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="text-center mb-16">
@@ -115,29 +115,29 @@ export default function Home() {
                             { name: "Kid's Cut", price: "$20", desc: "For the little gentlemen (Under 12)" },
                         ].map((item, i) => (
                             <div key={i} className="flex flex-col group">
-                                <div className="flex items-end justify-between font-bold text-xl uppercase mb-2 border-b-2 border-slate-200 pb-2 group-hover:border-amber-500 transition-colors">
+                                <div className="flex items-end justify-between font-bold text-xl uppercase mb-2 border-b-2 border-neutral-200 pb-2 group-hover:border-amber-500 transition-colors">
                                     <span>{item.name}</span>
                                     <span className="text-amber-600">{item.price}</span>
                                 </div>
-                                <p className="text-slate-500 italic text-sm">{item.desc}</p>
+                                <p className="text-neutral-500 italic text-sm">{item.desc}</p>
                             </div>
                         ))}
                     </div>
 
                     <div className="text-center mt-16">
                         <Link href="/services">
-                            <Button className="h-14 px-10 bg-black text-white hover:bg-slate-800 font-bold uppercase tracking-widest text-lg rounded-none">
+                            <Button className="h-14 px-10 bg-black text-white hover:bg-neutral-800 font-bold uppercase tracking-widest text-lg rounded-none">
                                 View Full Price List
                             </Button>
                         </Link>
                     </div>
                 </div>
                 {/* Bottom Jagged Edge */}
-                <div className="absolute bottom-0 left-0 w-full h-16 bg-slate-950" style={{ clipPath: "polygon(0 80%, 100% 0, 100% 100%, 0 100%)" }}></div>
+                <div className="absolute bottom-0 left-0 w-full h-16 bg-neutral-950" style={{ clipPath: "polygon(0 80%, 100% 0, 100% 100%, 0 100%)" }}></div>
             </section>
 
             {/* --- STATS & IMAGES --- */}
-            <section className="py-24 bg-slate-950 relative overflow-hidden">
+            <section className="py-24 bg-neutral-950 relative overflow-hidden">
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center border-b border-white/10 pb-20 mb-20">
                         {[
@@ -149,18 +149,18 @@ export default function Home() {
                             <div key={i} className="space-y-4">
                                 <stat.icon className="w-8 h-8 text-amber-500 mx-auto" />
                                 <div className="text-4xl md:text-5xl font-black text-white">{stat.num}</div>
-                                <div className="text-slate-400 uppercase tracking-widest text-xs font-bold">{stat.label}</div>
+                                <div className="text-neutral-400 uppercase tracking-widest text-xs font-bold">{stat.label}</div>
                             </div>
                         ))}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                        <div className="bg-slate-900 p-12 md:p-20 flex flex-col justify-center items-start text-left space-y-6">
+                        <div className="bg-neutral-900 p-12 md:p-20 flex flex-col justify-center items-start text-left space-y-6">
                             <h3 className="text-amber-500 font-bold uppercase tracking-widest">About Us</h3>
                             <h2 className="text-4xl md:text-6xl font-black text-white font-heading leading-tight">
                                 MORE THAN JUST <br /> A HAIRCUT
                             </h2>
-                            <p className="text-slate-400 text-lg leading-relaxed">
+                            <p className="text-neutral-400 text-lg leading-relaxed">
                                 We believe grooming is an essential part of being a gentleman.
                                 Our shop is fashioned as a haven where you can relax, network, and walk out looking your absolute best.
                             </p>
@@ -184,16 +184,16 @@ export default function Home() {
             {/* --- FINAL CTA with MAP BG --- */}
             <section className="relative py-40 flex items-center justify-center">
                 {/* Map Background Placeholder */}
-                <div className="absolute inset-0 z-0 bg-slate-900 opacity-50">
+                <div className="absolute inset-0 z-0 bg-neutral-900 opacity-50">
                     <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=2074&q=80" className="w-full h-full object-cover opacity-20 mix-blend-overlay" />
                 </div>
 
                 <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-                    <div className="bg-slate-950/90 p-12 md:p-20 border border-amber-500/30 backdrop-blur-sm">
+                    <div className="bg-neutral-950/90 p-12 md:p-20 border border-amber-500/30 backdrop-blur-sm">
                         <h2 className="text-4xl md:text-6xl font-black text-white font-heading uppercase mb-8">
                             Ready for the <span className="text-amber-500 mr-2 ml-2">Experience?</span>
                         </h2>
-                        <p className="text-slate-400 text-xl mb-10 max-w-xl mx-auto">
+                        <p className="text-neutral-400 text-xl mb-10 max-w-xl mx-auto">
                             Stop waiting in lines. Book your seat with the best barbers in Sialkot today.
                         </p>
                         <Link href="/book">

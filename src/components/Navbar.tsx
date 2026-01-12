@@ -19,7 +19,7 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="fixed top-0 z-50 w-full bg-slate-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl transition-all duration-300">
+        <nav className="fixed top-0 z-50 w-full bg-neutral-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl transition-all duration-300">
             <div className="container mx-auto px-6 h-28 flex items-center justify-center relative">
 
                 {/* Left Navigation */}
@@ -41,7 +41,7 @@ export default function Navbar() {
                     <span className="font-heading font-black text-3xl tracking-tighter text-white leading-none group-hover:text-amber-500 transition-colors">
                         PREMIUM<span className="text-amber-500 group-hover:text-white transition-colors">CUTS</span>
                     </span>
-                    <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Sialkot</span>
+                    <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold">Sialkot</span>
                 </Link>
 
                 {/* Right Navigation */}

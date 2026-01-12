@@ -75,7 +75,7 @@ export default function RootLayout({
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
                 />
             </head>
-            <body className={`${inter.variable} ${outfit.variable} font-sans antialiased min-h-screen bg-slate-950 text-slate-50 flex flex-col bg-noise`}>
+            <body className={`${inter.variable} ${outfit.variable} font-sans antialiased min-h-screen bg-neutral-950 text-neutral-50 flex flex-col bg-noise`}>
                 <Navbar />
                 <div className="flex-grow flex flex-col pb-20 md:pb-0">
                     {children}
