@@ -19,59 +19,49 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="fixed top-0 z-50 w-full bg-slate-950/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
-            <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+        <nav className="fixed top-0 z-50 w-full bg-slate-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl transition-all duration-300">
+            <div className="container mx-auto px-6 h-28 flex items-center justify-center relative">
 
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-amber-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity" />
-                        <div className="relative p-2.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl group-hover:scale-105 transition-transform">
-                            <Scissors className="w-5 h-5 text-black" />
-                        </div>
+                {/* Left Navigation */}
+                <div className="hidden md:flex items-center gap-12 text-sm font-bold tracking-widest uppercase">
+                    <Link href="/" className={clsx("hover:text-amber-500 transition-colors", pathname === "/" ? "text-amber-500" : "text-white")}>
+                        Home
+                    </Link>
+                    <Link href="/about" className={clsx("hover:text-amber-500 transition-colors", pathname === "/about" ? "text-amber-500" : "text-white")}>
+                        About
+                    </Link>
+                    <Link href="/services" className={clsx("hover:text-amber-500 transition-colors", pathname === "/services" ? "text-amber-500" : "text-white")}>
+                        Services
+                    </Link>
+                </div>
+
+                {/* Center Badge Logo */}
+                <Link href="/" className="mx-16 relative group">
+                    <div className="relative w-24 h-24 bg-slate-950 border-4 border-amber-500/30 rounded-full flex items-center justify-center z-10 shadow-[0_0_30px_rgba(245,158,11,0.2)] group-hover:border-amber-500 group-hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] transition-all duration-500 transform translate-y-4">
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-950 px-2 text-[10px] uppercase font-bold text-amber-500 tracking-widest whitespace-nowrap">Est. 2024</div>
+                        <Scissors className="w-10 h-10 text-white group-hover:text-amber-500 transition-colors" />
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-slate-950 px-2 text-[10px] uppercase font-bold text-amber-500 tracking-widest whitespace-nowrap">Sialkot</div>
                     </div>
-                    <div className="flex flex-col">
-                        <span className="font-heading font-bold text-xl tracking-tight text-white leading-none group-hover:text-amber-400 transition-colors">
-                            Premium<span className="text-amber-500">Cuts</span>
-                        </span>
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold group-hover:text-slate-400 transition-colors">
-                            Grooming Lens
-                        </span>
-                    </div>
+                    {/* Decorative Wings/Ribbons (CSS Shapes or Icons) - Optional for complexity, keeping simple but premium */}
                 </Link>
 
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-8">
-                    {links.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={clsx(
-                                "text-sm font-medium transition-all hover:text-amber-500 relative py-1",
-                                pathname === link.href ? "text-amber-500" : "text-slate-300"
-                            )}
-                        >
-                            {link.label}
-                            {pathname === link.href && (
-                                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-amber-500 rounded-full animate-in fade-in zoom-in duration-300" />
-                            )}
-                        </Link>
-                    ))}
+                {/* Right Navigation */}
+                <div className="hidden md:flex items-center gap-12 text-sm font-bold tracking-widest uppercase">
+                    <Link href="/team" className={clsx("hover:text-amber-500 transition-colors", pathname === "/team" ? "text-amber-500" : "text-white")}>
+                        Team
+                    </Link>
+                    <Link href="/blog" className={clsx("hover:text-amber-500 transition-colors", pathname === "/blog" ? "text-amber-500" : "text-white")}>
+                        Blog
+                    </Link>
+                    <Link href="/contact" className={clsx("hover:text-amber-500 transition-colors", pathname === "/contact" ? "text-amber-500" : "text-white")}>
+                        Contact
+                    </Link>
                 </div>
 
-                {/* CTA */}
-                <div className="hidden md:flex items-center gap-4">
-                    <Link href="/status">
-                        <button className="text-sm font-bold text-slate-400 hover:text-white transition-colors">
-                            Check Queue
-                        </button>
-                    </Link>
-                    <Link href="/book">
-                        <button className="bg-white hover:bg-slate-200 text-black px-6 py-2.5 rounded-full text-sm font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all transform hover:-translate-y-0.5">
-                            Book Now
-                        </button>
-                    </Link>
-                </div>
+                {/* Mobile Menu Icon (Absolute Right) */}
+                {/* Note: MobileNav component is handled in layout, but typically we need a hamburger here for mobile. 
+                     Since the prompt asks for header 'like that' (desktop reference), we focus on desktop layout.
+                     The existing MobileNav is typically fixed at bottom or separate. We leave layout generic for mobile. */}
             </div>
         </nav>
     );
