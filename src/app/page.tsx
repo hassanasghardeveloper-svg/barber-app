@@ -16,18 +16,21 @@ export default function Home() {
 
                 <div className="z-10 max-w-4xl space-y-8 animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-8 mt-16 md:mt-0">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-sm font-bold uppercase tracking-widest mb-4">
-                        <Star className="w-4 h-4 fill-amber-500" /> Voted Best in City
+                        <Star className="w-4 h-4 fill-amber-500" />
+                        <span className="text-white ml-1 mr-1">4.9/5</span>
+                        <span className="opacity-70">from 500+ Reviews</span>
                     </div>
 
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight font-heading text-white leading-[1.1]">
-                        Mastering the <br />
+                        Best Barber Shop <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-500 to-amber-600">
-                            Art of Grooming
+                            in New York City
                         </span>
                     </h1>
 
                     <p className="text-lg md:text-2xl text-slate-400 font-light max-w-2xl mx-auto leading-relaxed">
-                        Precision cuts, traditional shaves, and a modern booking experience without the wait.
+                        Precision cuts, master barbers, and a seamless online booking experience. <br />
+                        <span className="text-amber-500 font-medium">Walk-ins welcome, appointments preferred.</span>
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-6 justify-center w-full pt-8 scale-100 hover:scale-[1.02] transition-transform duration-500">
