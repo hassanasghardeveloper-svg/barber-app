@@ -13,7 +13,6 @@ export default function Navbar() {
         { href: "/services", label: "Services" },
         { href: "/gallery", label: "Gallery" },
         { href: "/team", label: "Team" },
-        { href: "/admin/dashboard", label: "Admin" }, // Temporary for easy access
     ];
 
     return (
