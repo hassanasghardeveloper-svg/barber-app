@@ -64,7 +64,7 @@ export default function Navbar() {
 
             {/* --- MOBILE MENU OVERLAY --- */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 top-28 bg-neutral-950/95 backdrop-blur-xl z-40 flex flex-col items-center pt-12 space-y-8 animate-in slide-in-from-top-10 duration-200 md:hidden">
+                <div className="fixed inset-0 top-28 bg-neutral-950 z-40 flex flex-col items-center pt-12 space-y-8 animate-in slide-in-from-top-10 duration-200 md:hidden border-t border-white/10">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
