@@ -74,7 +74,7 @@ export default function Home() {
                         {[
                             { name: "Ali Hassan", role: "Master Barber", img: "https://images.unsplash.com/photo-1580518337843-f959e992563b?w=400&h=400&fit=crop" },
                             { name: "Zain Ahmed", role: "Stylist", img: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&h=400&fit=crop" },
-                            { name: "Bilal Khan", role: "Beard Expert", img: "https://images.unsplash.com/photo-1599351431202-6e0c051cd1a0?w=400&h=400&fit=crop" }
+                            { name: "Bilal Khan", role: "Beard Expert", img: "https://images.unsplash.com/photo-1618077555391-58ea7a988d44?w=400&h=400&fit=crop" }
                         ].map((member, i) => (
                             <div key={i} className="group flex flex-col items-center gap-6">
                                 <div className="w-48 h-48 rounded-full p-1 border-2 border-amber-500/30 group-hover:border-amber-500 transition-colors">
