@@ -36,13 +36,12 @@ export default function Navbar() {
                 </div>
 
                 {/* Center Badge Logo */}
-                <Link href="/" className="mx-16 relative group">
-                    <div className="relative w-24 h-24 bg-slate-950 border-4 border-amber-500/30 rounded-full flex items-center justify-center z-10 shadow-[0_0_30px_rgba(245,158,11,0.2)] group-hover:border-amber-500 group-hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] transition-all duration-500 transform translate-y-4">
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-950 px-2 text-[10px] uppercase font-bold text-amber-500 tracking-widest whitespace-nowrap">Est. 2024</div>
-                        <Scissors className="w-10 h-10 text-white group-hover:text-amber-500 transition-colors" />
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-slate-950 px-2 text-[10px] uppercase font-bold text-amber-500 tracking-widest whitespace-nowrap">Sialkot</div>
-                    </div>
-                    {/* Decorative Wings/Ribbons (CSS Shapes or Icons) - Optional for complexity, keeping simple but premium */}
+                <Link href="/" className="mx-12 flex flex-col items-center group">
+                    <Scissors className="w-10 h-10 text-amber-500 mb-1 group-hover:scale-110 transition-transform" />
+                    <span className="font-heading font-black text-3xl tracking-tighter text-white leading-none group-hover:text-amber-500 transition-colors">
+                        PREMIUM<span className="text-amber-500 group-hover:text-white transition-colors">CUTS</span>
+                    </span>
+                    <span className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-bold">Sialkot</span>
                 </Link>
 
                 {/* Right Navigation */}
