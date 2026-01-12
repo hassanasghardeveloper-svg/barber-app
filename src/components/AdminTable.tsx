@@ -12,6 +12,8 @@ export interface Appointment {
     status: "Waiting" | "Serving" | "Done" | "No-Show";
     waitTime: string;
     email?: string | null;
+    gender?: string | null;
+    barber?: string | null;
 }
 
 interface AdminTableProps {
@@ -57,7 +59,11 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                 <span className="font-mono text-xl font-bold text-white bg-slate-800 px-2 py-1 rounded inline-block mb-2">
                                     #{apt.queueNumber}
                                 </span>
-                                <h3 className="font-bold text-white text-lg">{apt.name}</h3>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-white text-lg">{apt.name}</h3>
+                                    {apt.gender === 'Female' && <span className="text-pink-400 text-xs bg-pink-500/10 px-1.5 py-0.5 rounded">👩</span>}
+                                    {apt.gender === 'Male' && <span className="text-blue-400 text-xs bg-blue-500/10 px-1.5 py-0.5 rounded">👨</span>}
+                                </div>
                                 {apt.phone && (
                                     <div className="flex items-center gap-2 mt-1">
                                         <p className="text-slate-500 text-sm">{apt.phone}</p>
@@ -81,9 +87,12 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                         </div>
 
                         <div className="flex items-center justify-between text-sm py-2 border-t border-slate-800/50 mt-2">
-                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-800 text-slate-300`}>
-                                {apt.service}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-800 text-slate-300 w-fit`}>
+                                    {apt.service}
+                                </span>
+                                {apt.barber && <span className="text-xs text-slate-500">Barber: <span className="text-amber-500">{apt.barber}</span></span>}
+                            </div>
                             <span className="text-slate-500 text-xs">Wait: {apt.waitTime}</span>
                         </div>
 
@@ -152,7 +161,11 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-white text-base">{apt.name}</div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="font-medium text-white text-base">{apt.name}</div>
+                                            {apt.gender === 'Female' && <span className="text-pink-400 text-xs bg-pink-500/10 px-1.5 py-0.5 rounded cursor-help" title="Female">👩</span>}
+                                            {apt.gender === 'Male' && <span className="text-blue-400 text-xs bg-blue-500/10 px-1.5 py-0.5 rounded cursor-help" title="Male">👨</span>}
+                                        </div>
                                         <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
                                             {apt.phone}
                                             {apt.phone && (
@@ -167,12 +180,15 @@ export default function AdminTable({ appointments, onUpdateStatus }: AdminTableP
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border
-                                            ${apt.service === 'Haircut' ? 'bg-blue-500/5 text-blue-400 border-blue-500/10' :
-                                                apt.service === 'Beard' ? 'bg-amber-500/5 text-amber-400 border-amber-500/10' :
-                                                    'bg-purple-500/5 text-purple-400 border-purple-500/10'}`}>
-                                            {apt.service}
-                                        </span>
+                                        <div className="flex flex-col gap-1 items-start">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border
+                                                ${apt.service === 'Haircut' ? 'bg-blue-500/5 text-blue-400 border-blue-500/10' :
+                                                    apt.service === 'Beard' ? 'bg-amber-500/5 text-amber-400 border-amber-500/10' :
+                                                        'bg-purple-500/5 text-purple-400 border-purple-500/10'}`}>
+                                                {apt.service}
+                                            </span>
+                                            {apt.barber && <span className="text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">with <span className="text-amber-500 font-bold">{apt.barber}</span></span>}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className={`flex items-center gap-2 font-medium

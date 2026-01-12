@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         console.log("Appointment POST received:", body);
-        const { name, phone, service, email } = body;
+        const { name, phone, service, email, gender, barber } = body;
 
         // 1. Check Settings
         const settings = await prisma.settings.findFirst();
@@ -68,6 +68,8 @@ export async function POST(req: Request) {
                 phone,
                 service,
                 email,
+                gender,
+                barber,
                 queueNumber: nextQueueNum,
                 status: 'Waiting'
             }

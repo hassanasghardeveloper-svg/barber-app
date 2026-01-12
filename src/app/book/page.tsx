@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Check, User, Phone, CheckCircle2, Scissors, Sparkles, Clock, CalendarX, AlertCircle, MessageCircle } from "lucide-react";
+import { Check, User, Phone, CheckCircle2, Scissors, Sparkles, Clock, CalendarX, AlertCircle, MessageCircle, ArrowLeft, Users } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
 import { motion, AnimatePresence, Variants } from "framer-motion";
@@ -19,31 +19,22 @@ const formSchema = z.object({
         .refine((email) => email.toLowerCase().endsWith("@gmail.com") || email.toLowerCase().endsWith("@outlook.com"), {
             message: "Only @gmail.com or @outlook.com addresses are accepted",
         }),
-    service: z.enum(["Haircut", "Beard", "Both"]),
+    service: z.string(),
+    gender: z.enum(["Male", "Female"]),
+    barber: z.string(),
     updates: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const containerVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            duration: 0.6,
-            staggerChildren: 0.1
-        }
-    },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.4 } }
-};
-
-const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+const stepVariants: Variants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
 };
 
 export default function BookingPage() {
+    const [step, setStep] = useState(1);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [queueData, setQueueData] = useState<{ number: number; waitTime: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -58,9 +49,14 @@ export default function BookingPage() {
             phone: "",
             email: "",
             service: "Haircut",
+            gender: "Male" as any, // Default, but user will pick
+            barber: "Any Professional",
             updates: false,
         },
     });
+
+    // Watch values for conditional rendering
+    const selectedGender = form.watch("gender");
 
     useEffect(() => {
         async function checkSettings() {
@@ -83,9 +79,6 @@ export default function BookingPage() {
                         const [hours, minutes] = settings.closeTime.split(':').map(Number);
                         const closeTime = new Date();
                         closeTime.setHours(hours, minutes, 0);
-
-                        // If close time is tomorrow (e.g. crossing midnight), handle logic appropriately
-                        // simplified for same-day close
                         if (now > closeTime) {
                             setIsShopClosed(true);
                         }
@@ -103,7 +96,6 @@ export default function BookingPage() {
     async function onSubmit(values: FormValues) {
         setIsLoading(true);
         try {
-            // 1. Create Appointment in DB
             const res = await fetch('/api/appointments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -116,11 +108,9 @@ export default function BookingPage() {
             }
 
             const newAppt = await res.json();
-
-            // 2. Mock Wait Time
             const mockWait = "30-45 mins";
 
-            // 3. Trigger Email Notification
+            // Trigger Email (Optimistic)
             fetch('/api/notify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -142,7 +132,6 @@ export default function BookingPage() {
             if (error.message.includes("We are closed") || error.message.includes("queue is currently closed")) {
                 setIsShopClosed(true);
             } else {
-                // Set form error or general error
                 form.setError("root", { message: error.message });
             }
         } finally {
@@ -150,6 +139,10 @@ export default function BookingPage() {
         }
     }
 
+    const nextStep = () => setStep((s) => s + 1);
+    const prevStep = () => setStep((s) => s - 1);
+
+    // --- Loading & Closed States ---
     if (loadingSettings) {
         return (
             <main className="flex-grow flex items-center justify-center p-4 min-h-[600px]">
@@ -158,260 +151,235 @@ export default function BookingPage() {
                         <div className="w-16 h-16 border-4 border-slate-800 rounded-full"></div>
                         <div className="absolute top-0 left-0 w-16 h-16 border-4 border-amber-500 rounded-full border-t-transparent animate-spin"></div>
                     </div>
-                    <p className="text-slate-400 font-medium animate-pulse">Checking shop status...</p>
                 </div>
             </main>
         );
     }
 
-    // Closed State
     if (isShopClosed) {
         return (
-            <motion.main
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex-grow flex items-center justify-center p-4 min-h-[600px]"
-            >
+            <main className="flex-grow flex items-center justify-center p-4 min-h-[600px]">
                 <div className="max-w-md w-full bg-slate-900/40 backdrop-blur-2xl border border-slate-800/80 rounded-[2rem] p-8 shadow-2xl text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/0 via-red-500/50 to-red-500/0" />
-
                     <div className="mx-auto w-24 h-24 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full flex items-center justify-center mb-6 shadow-inner ring-1 ring-white/5">
                         <CalendarX className="w-10 h-10 text-red-500/80" />
                     </div>
-
                     <h2 className="text-3xl font-heading font-bold text-white mb-3">Shop is Closed</h2>
-                    <p className="text-slate-400 mb-8 leading-relaxed">
-                        We're currently recharging our clippers. <br />
-                        Please come back during our opening hours <br />
-                        <span className="text-amber-500 font-semibold">10:00 AM - 10:00 PM</span>
-                    </p>
-
-                    <div className="space-y-3">
-                        <Link href="/" className="block w-full">
-                            <Button variant="outline" className="w-full text-slate-300 border-slate-700/50 hover:bg-slate-800 hover:text-white h-12 rounded-xl transition-all duration-300">
-                                Back to Home
-                            </Button>
-                        </Link>
-                        <Link href="/status" className="block w-full">
-                            <Button className="w-full h-12 rounded-xl text-amber-500 hover:bg-amber-500/10" variant="ghost">
-                                Check Queue Status
-                            </Button>
-                        </Link>
-                    </div>
+                    <p className="text-slate-400 mb-8">Please come back during our opening hours <span className="text-amber-500 font-semibold">10:00 AM - 10:00 PM</span></p>
+                    <Link href="/"><Button variant="outline" className="w-full">Back to Home</Button></Link>
                 </div>
-            </motion.main>
+            </main>
         );
     }
 
-    // Success State
+    // --- Success State ---
     if (isSubmitted && queueData) {
         return (
-            <motion.main
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex-grow flex items-center justify-center p-4 min-h-[600px]"
-            >
+            <main className="flex-grow flex items-center justify-center p-4 min-h-[600px]">
                 <div className="max-w-md w-full bg-slate-900/40 backdrop-blur-2xl border border-slate-800/80 rounded-[2rem] p-8 shadow-2xl text-center relative overflow-hidden">
-                    {/* Success Confetti Effect could go here */}
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
-
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                        className="mx-auto w-24 h-24 bg-gradient-to-br from-green-500/20 to-emerald-500/5 rounded-full flex items-center justify-center mb-6 ring-1 ring-green-500/30 shadow-[0_0_30px_-5px_rgba(34,197,94,0.3)]"
-                    >
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mx-auto w-24 h-24 bg-gradient-to-br from-green-500/20 to-emerald-500/5 rounded-full flex items-center justify-center mb-6 ring-1 ring-green-500/30">
                         <CheckCircle2 className="w-12 h-12 text-green-500" />
                     </motion.div>
-
                     <h2 className="text-3xl font-heading font-bold text-white mb-2">You're on the list!</h2>
-                    <p className="text-slate-400 mb-8 text-sm">A confirmation email has been sent to you.</p>
-
+                    <p className="text-slate-400 mb-8 text-sm">A confirmation email has been sent.</p>
                     <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/50 flex flex-col items-center justify-center">
-                            <p className="text-slate-500 text-[10px] uppercase tracking-widest font-bold mb-2">Queue Number</p>
-                            <p className="text-5xl font-heading font-bold text-amber-500 tracking-tighter">#{queueData.number}</p>
+                        <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800/50">
+                            <p className="text-slate-500 text-[10px] uppercase font-bold mb-1">Queue #</p>
+                            <p className="text-4xl font-bold text-amber-500">#{queueData.number}</p>
                         </div>
-                        <div className="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/50 flex flex-col items-center justify-center">
-                            <p className="text-slate-500 text-[10px] uppercase tracking-widest font-bold mb-2">Est. Wait</p>
-                            <div className="flex items-center gap-1.5 text-blue-400">
-                                <Clock className="w-4 h-4" />
-                                <p className="text-xl font-bold">{queueData.waitTime}</p>
-                            </div>
+                        <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800/50">
+                            <p className="text-slate-500 text-[10px] uppercase font-bold mb-1">Est. Wait</p>
+                            <p className="text-xl font-bold text-blue-400 pt-2">{queueData.waitTime}</p>
                         </div>
                     </div>
-
-                    <div className="space-y-3">
-                        {shopPhone && (
-                            <Button
-                                onClick={() => {
-                                    const message = `Hi, I just booked appointment #${queueData.number} for ${form.getValues("name")}.`;
-                                    window.open(`https://wa.me/${shopPhone}?text=${encodeURIComponent(message)}`, '_blank');
-                                }}
-                                className="w-full h-14 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl shadow-lg shadow-green-500/20"
-                            >
-                                <MessageCircle className="w-5 h-5 mr-2" />
-                                Send to WhatsApp
-                            </Button>
-                        )}
-                        <Link href="/status" className="block w-full">
-                            <Button className="w-full h-14 text-base font-bold rounded-xl shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]" variant="premium">
-                                Track Live Status
-                            </Button>
-                        </Link>
-                        <Link href="/" className="block w-full">
-                            <Button variant="ghost" className="w-full text-slate-500 hover:text-white hover:bg-white/5 h-12 rounded-xl">
-                                Return Home
-                            </Button>
-                        </Link>
-                    </div>
+                    {shopPhone && (
+                        <Button
+                            onClick={() => {
+                                const message = `Hi, I just booked appointment #${queueData.number} for ${form.getValues("name")}.`;
+                                window.open(`https://wa.me/${shopPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                            }}
+                            className="w-full mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl"
+                        >
+                            <MessageCircle className="w-5 h-5 mr-2" /> Send to WhatsApp
+                        </Button>
+                    )}
+                    <Link href="/status"><Button className="w-full mb-3" variant="premium">Track Status</Button></Link>
+                    <Link href="/"><Button variant="ghost" className="w-full text-slate-500">Return Home</Button></Link>
                 </div>
-            </motion.main>
+            </main>
         );
     }
 
-    // Default Booking Form
+    // --- Wizard Form ---
     return (
         <main className="flex-grow flex items-center justify-center p-4 relative overflow-hidden min-h-screen">
-            {/* Ambient Background Effects */}
+            {/* Background */}
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] mix-blend-screen animate-blob animation-delay-2000" />
                 <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen animate-blob" />
             </div>
 
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="max-w-lg w-full z-10"
-            >
-                <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
-                    {/* Header */}
-                    <div className="bg-slate-950/30 p-8 pb-6 text-center relative border-b border-white/5">
-                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-                        <h1 className="text-3xl md:text-4xl font-bold text-white font-heading tracking-tight">
-                            Secure Your Spot
-                        </h1>
-                        <p className="text-slate-400 text-sm mt-3 font-light">
-                            Premium grooming experience awaits.
-                        </p>
+            <div className="max-w-lg w-full z-10">
+                <div className="bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden min-h-[500px] flex flex-col">
+
+                    {/* Progress Header */}
+                    <div className="bg-slate-950/30 p-6 border-b border-white/5 flex items-center justify-between">
+                        {step > 1 ? (
+                            <button onClick={prevStep} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                <ArrowLeft className="w-5 h-5 text-slate-400" />
+                            </button>
+                        ) : <div className="w-9" />}
+
+                        <div className="text-center">
+                            <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Step {step} of 3</span>
+                            <h2 className="text-lg font-bold text-white mt-1">
+                                {step === 1 && "Choose Gender"}
+                                {step === 2 && "Select Barber"}
+                                {step === 3 && "Final Details"}
+                            </h2>
+                        </div>
+                        <div className="w-9" />
                     </div>
 
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-8">
-                        {/* Personal Info Group */}
-                        <div className="space-y-5">
-                            <motion.div variants={itemVariants} className="space-y-2">
-                                <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Full Name</label>
-                                <div className="relative group">
-                                    <User className="absolute left-4 top-4 w-5 h-5 text-slate-500 group-focus-within:text-amber-500 transition-colors" />
-                                    <input
-                                        {...form.register("name")}
-                                        type="text"
-                                        className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl h-14 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all font-medium"
-                                        placeholder="Enter your name"
-                                    />
-                                </div>
-                                {form.formState.errors.name && (
-                                    <p className="flex items-center gap-1 text-red-400 text-xs ml-1 mt-1">
-                                        <AlertCircle className="w-3 h-3" /> {form.formState.errors.name.message}
-                                    </p>
-                                )}
-                            </motion.div>
-
-                            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Phone <span className="text-slate-600 font-normal normal-case">(Optional)</span></label>
-                                    <div className="relative group">
-                                        <Phone className="absolute left-4 top-4 w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
-                                        <input
-                                            {...form.register("phone")}
-                                            type="tel"
-                                            className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl h-14 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
-                                            placeholder="03xx xxxx"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Email</label>
-                                    <div className="relative group">
-                                        <div className="absolute left-4 top-4 w-5 h-5 flex items-center justify-center pointer-events-none">
-                                            <span className="text-slate-500 group-focus-within:text-amber-500 transition-colors font-serif italic text-lg">@</span>
+                    <div className="p-8 flex-grow flex flex-col">
+                        <AnimatePresence mode="wait">
+                            {/* STEP 1: GENDER */}
+                            {step === 1 && (
+                                <motion.div key="step1" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-4 flex-grow justify-center">
+                                    <button
+                                        onClick={() => { form.setValue("gender", "Male"); nextStep(); }}
+                                        className="group relative h-32 w-full bg-slate-800/50 hover:bg-slate-800 border-2 border-slate-700 hover:border-amber-500 rounded-3xl transition-all flex items-center px-8"
+                                    >
+                                        <div className="bg-blue-500/20 p-4 rounded-2xl group-hover:bg-blue-500/30 transition-colors">
+                                            <User className="w-8 h-8 text-blue-400" />
                                         </div>
-                                        <input
-                                            {...form.register("email")}
-                                            type="email"
-                                            className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl h-14 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all font-medium"
-                                            placeholder="you@gmail.com"
-                                        />
-                                    </div>
-                                    {form.formState.errors.email && (
-                                        <p className="flex items-center gap-1 text-red-400 text-xs ml-1 mt-1">
-                                            <AlertCircle className="w-3 h-3" /> {form.formState.errors.email.message}
-                                        </p>
-                                    )}
-                                </div>
-                            </motion.div>
-                        </div>
+                                        <div className="ml-6 text-left">
+                                            <h3 className="text-2xl font-bold text-white group-hover:text-amber-500 transition-colors">Male</h3>
+                                            <p className="text-slate-400 text-sm">Haircuts, beard trims & more</p>
+                                        </div>
+                                    </button>
 
-                        {/* Service Selection */}
-                        <motion.div variants={itemVariants} className="space-y-3">
-                            <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Select Service</label>
-                            <div className="grid grid-cols-3 gap-3">
-                                {[
-                                    { id: "Haircut", icon: Scissors, label: "Haircut" },
-                                    { id: "Beard", icon: User, label: "Beard" },
-                                    { id: "Both", icon: Sparkles, label: "Full Deal" }
-                                ].map((item) => {
-                                    const isSelected = form.watch("service") === item.id;
-                                    const Icon = item.icon;
-                                    return (
-                                        <button
-                                            key={item.id}
-                                            type="button"
-                                            onClick={() => form.setValue("service", item.id as any)}
-                                            className={clsx(
-                                                "relative group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl transition-all duration-300 border",
-                                                isSelected
-                                                    ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_20px_-5px_rgba(245,158,11,0.5)] scale-[1.02]"
-                                                    : "bg-slate-950/50 text-slate-400 border-slate-800 hover:border-slate-600 hover:bg-slate-900"
-                                            )}
-                                        >
-                                            <Icon className={clsx("w-6 h-6 transition-transform", isSelected ? "scale-110" : "group-hover:scale-110")} />
-                                            <span className="text-xs font-bold uppercase tracking-wide">{item.label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </motion.div>
-
-                        <motion.div variants={itemVariants} className="pt-4">
-                            <Button
-                                type="submit"
-                                variant="premium"
-                                className="w-full h-14 text-base font-bold rounded-2xl shadow-xl shadow-amber-500/10 hover:shadow-amber-500/25 transition-all active:scale-[0.98]"
-                                disabled={form.formState.isSubmitting}
-                            >
-                                {form.formState.isSubmitting ? (
-                                    <span className="flex items-center gap-3">
-                                        <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                                        Processing Order...
-                                    </span>
-                                ) : "Confirm Appointment"}
-                            </Button>
-                            {form.formState.errors.root && (
-                                <div className="p-3 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-400 text-xs">
-                                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                    <p>{form.formState.errors.root.message}</p>
-                                </div>
+                                    <button
+                                        onClick={() => { form.setValue("gender", "Female"); nextStep(); }}
+                                        className="group relative h-32 w-full bg-slate-800/50 hover:bg-slate-800 border-2 border-slate-700 hover:border-pink-500 rounded-3xl transition-all flex items-center px-8"
+                                    >
+                                        <div className="bg-pink-500/20 p-4 rounded-2xl group-hover:bg-pink-500/30 transition-colors">
+                                            <User className="w-8 h-8 text-pink-400" />
+                                        </div>
+                                        <div className="ml-6 text-left">
+                                            <h3 className="text-2xl font-bold text-white group-hover:text-pink-500 transition-colors">Female</h3>
+                                            <p className="text-slate-400 text-sm">Styling, cuts & treatments</p>
+                                        </div>
+                                    </button>
+                                </motion.div>
                             )}
-                            <p className="text-center text-[10px] text-slate-600 mt-5">
-                                By booking, you agree to our <span className="underline cursor-pointer hover:text-slate-400">Terms of Service</span>.
-                            </p>
-                        </motion.div>
-                    </form>
+
+                            {/* STEP 2: BARBER */}
+                            {step === 2 && (
+                                <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
+                                    <p className="text-slate-400 text-sm text-center mb-4">Select a professional or choose 'Any' for fastest service.</p>
+
+                                    <button
+                                        onClick={() => { form.setValue("barber", "Any Professional"); nextStep(); }}
+                                        className="w-full p-4 bg-amber-500 text-black font-bold rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-between group hover:brightness-110 transition-all"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-black/10 p-2 rounded-xl"><Sparkles className="w-6 h-6" /></div>
+                                            <div className="text-left">
+                                                <div className="text-lg">Any Professional</div>
+                                                <div className="text-xs opacity-75 font-normal">Fastest service (Recommended)</div>
+                                            </div>
+                                        </div>
+                                        <ArrowLeft className="w-5 h-5 rotate-180 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </button>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {(selectedGender === "Male" ? ["Ali", "Hassan", "Ahmed"] : ["Sarah", "Fatima"]).map((name) => (
+                                            <button
+                                                key={name}
+                                                onClick={() => { form.setValue("barber", name); nextStep(); }}
+                                                className="p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 rounded-2xl transition-all flex flex-col items-center gap-2 text-center"
+                                            >
+                                                <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center text-lg font-bold text-slate-300">
+                                                    {name[0]}
+                                                </div>
+                                                <span className="font-bold text-white">{name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* STEP 3: DETAILS */}
+                            {step === 3 && (
+                                <motion.div key="step3" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                        {/* Services */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Select Service</label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {(selectedGender === "Male"
+                                                    ? [
+                                                        { id: "Haircut", label: "Haircut" },
+                                                        { id: "Beard", label: "Beard Trim" },
+                                                        { id: "Both", label: "Full Package" },
+                                                        { id: "Facial", label: "Facial" }
+                                                    ]
+                                                    : [
+                                                        { id: "Haircut", label: "Haircut" },
+                                                        { id: "BlowDry", label: "Blow Dry" },
+                                                        { id: "Styling", label: "Hair Styling" },
+                                                        { id: "Treatment", label: "Treatment" }
+                                                    ]
+                                                ).map((item) => {
+                                                    const isSelected = form.watch("service") === item.id;
+                                                    return (
+                                                        <button
+                                                            key={item.id}
+                                                            type="button"
+                                                            onClick={() => form.setValue("service", item.id as any)}
+                                                            className={clsx(
+                                                                "p-3 rounded-xl border text-sm font-bold transition-all",
+                                                                isSelected
+                                                                    ? "bg-amber-500 text-black border-amber-500"
+                                                                    : "bg-slate-950/50 text-slate-400 border-slate-800 hover:bg-slate-900"
+                                                            )}
+                                                        >
+                                                            {item.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Inputs */}
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <input {...form.register("name")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none" placeholder="Your Name" />
+                                                {form.formState.errors.name && <p className="text-red-400 text-xs">{form.formState.errors.name.message}</p>}
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <input {...form.register("phone")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none" placeholder="Phone (Optional)" />
+                                                <input {...form.register("email")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none" placeholder="Email (Gmail/Outlook)" />
+                                            </div>
+                                            {form.formState.errors.email && <p className="text-red-400 text-xs">{form.formState.errors.email.message}</p>}
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            variant="premium"
+                                            className="w-full h-14 text-base font-bold rounded-2xl shadow-xl shadow-amber-500/10"
+                                            disabled={form.formState.isSubmitting}
+                                        >
+                                            {form.formState.isSubmitting ? "Processing..." : "Confirm Booking"}
+                                        </Button>
+                                    </form>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
-            </motion.div>
+            </div>
         </main>
     );
 }
