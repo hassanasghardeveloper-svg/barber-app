@@ -12,6 +12,12 @@ export default function StatusPage() {
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!query.trim()) {
+            alert("Please enter your Phone, Email, or Queue Number.");
+            return;
+        }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/appointments');
