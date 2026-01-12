@@ -212,7 +212,7 @@ export default function BookingPage() {
 
     // --- Wizard Form ---
     return (
-        <main className="flex-grow flex items-center justify-center p-4 relative overflow-hidden min-h-screen">
+        <main className="flex-grow flex items-center justify-center p-4 pb-20 md:pb-4 relative overflow-hidden min-h-screen">
             {/* Background */}
             <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[120px] mix-blend-screen animate-blob animation-delay-2000" />
@@ -220,55 +220,57 @@ export default function BookingPage() {
             </div>
 
             <div className="max-w-lg w-full z-10">
-                <div className="bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden min-h-[500px] flex flex-col">
+                <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/5 overflow-hidden flex flex-col">
 
                     {/* Progress Header */}
-                    <div className="bg-slate-950/30 p-6 border-b border-white/5 flex items-center justify-between">
-                        {step > 1 ? (
-                            <button onClick={prevStep} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                                <ArrowLeft className="w-5 h-5 text-slate-400" />
-                            </button>
-                        ) : <div className="w-9" />}
+                    <div className="bg-slate-950/50 p-6 border-b border-white/5 flex items-center justify-between">
+                        <div className="w-10">
+                            {step > 1 && (
+                                <button onClick={prevStep} className="p-2 hover:bg-white/5 rounded-full transition-colors -ml-2">
+                                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                                </button>
+                            )}
+                        </div>
 
                         <div className="text-center">
-                            <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Step {step} of 3</span>
-                            <h2 className="text-lg font-bold text-white mt-1">
+                            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Step {step} of 3</span>
+                            <h2 className="text-lg font-bold text-white mt-0.5">
                                 {step === 1 && "Choose Gender"}
                                 {step === 2 && "Select Barber"}
                                 {step === 3 && "Final Details"}
                             </h2>
                         </div>
-                        <div className="w-9" />
+                        <div className="w-10" />
                     </div>
 
-                    <div className="p-8 flex-grow flex flex-col">
+                    <div className="p-6 md:p-8 flex-grow flex flex-col">
                         <AnimatePresence mode="wait">
                             {/* STEP 1: GENDER */}
                             {step === 1 && (
-                                <motion.div key="step1" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-4 flex-grow justify-center">
+                                <motion.div key="step1" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-4 flex-grow justify-center py-4">
                                     <button
                                         onClick={() => { form.setValue("gender", "Male"); nextStep(); }}
-                                        className="group relative h-32 w-full bg-slate-800/50 hover:bg-slate-800 border-2 border-slate-700 hover:border-amber-500 rounded-3xl transition-all flex items-center px-8"
+                                        className="group relative h-28 md:h-32 w-full bg-slate-800/50 hover:bg-slate-800 border-2 border-slate-700 hover:border-amber-500 rounded-3xl transition-all flex items-center px-6 md:px-8"
                                     >
-                                        <div className="bg-blue-500/20 p-4 rounded-2xl group-hover:bg-blue-500/30 transition-colors">
-                                            <User className="w-8 h-8 text-blue-400" />
+                                        <div className="bg-blue-500/20 p-3 md:p-4 rounded-2xl group-hover:bg-blue-500/30 transition-colors shrink-0">
+                                            <User className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
                                         </div>
-                                        <div className="ml-6 text-left">
-                                            <h3 className="text-2xl font-bold text-white group-hover:text-amber-500 transition-colors">Male</h3>
-                                            <p className="text-slate-400 text-sm">Haircuts, beard trims & more</p>
+                                        <div className="ml-5 text-left">
+                                            <h3 className="text-xl md:text-2xl font-bold text-white group-hover:text-amber-500 transition-colors">Male</h3>
+                                            <p className="text-slate-400 text-xs md:text-sm">Haircuts, beard trims & more</p>
                                         </div>
                                     </button>
 
                                     <button
                                         onClick={() => { form.setValue("gender", "Female"); nextStep(); }}
-                                        className="group relative h-32 w-full bg-slate-800/50 hover:bg-slate-800 border-2 border-slate-700 hover:border-pink-500 rounded-3xl transition-all flex items-center px-8"
+                                        className="group relative h-28 md:h-32 w-full bg-slate-800/50 hover:bg-slate-800 border-2 border-slate-700 hover:border-pink-500 rounded-3xl transition-all flex items-center px-6 md:px-8"
                                     >
-                                        <div className="bg-pink-500/20 p-4 rounded-2xl group-hover:bg-pink-500/30 transition-colors">
-                                            <User className="w-8 h-8 text-pink-400" />
+                                        <div className="bg-pink-500/20 p-3 md:p-4 rounded-2xl group-hover:bg-pink-500/30 transition-colors shrink-0">
+                                            <User className="w-6 h-6 md:w-8 md:h-8 text-pink-400" />
                                         </div>
-                                        <div className="ml-6 text-left">
-                                            <h3 className="text-2xl font-bold text-white group-hover:text-pink-500 transition-colors">Female</h3>
-                                            <p className="text-slate-400 text-sm">Styling, cuts & treatments</p>
+                                        <div className="ml-5 text-left">
+                                            <h3 className="text-xl md:text-2xl font-bold text-white group-hover:text-pink-500 transition-colors">Female</h3>
+                                            <p className="text-slate-400 text-xs md:text-sm">Styling, cuts & treatments</p>
                                         </div>
                                     </button>
                                 </motion.div>
@@ -276,34 +278,34 @@ export default function BookingPage() {
 
                             {/* STEP 2: BARBER */}
                             {step === 2 && (
-                                <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                                    <p className="text-slate-400 text-sm text-center mb-4">Select a professional or choose 'Any' for fastest service.</p>
+                                <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4 py-2">
+                                    <p className="text-slate-400 text-sm text-center mb-4">Select a professional or choose 'Any'.</p>
 
                                     <button
                                         onClick={() => { form.setValue("barber", "Any Professional"); nextStep(); }}
                                         className="w-full p-4 bg-amber-500 text-black font-bold rounded-2xl shadow-lg shadow-amber-500/20 flex items-center justify-between group hover:brightness-110 transition-all"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-black/10 p-2 rounded-xl"><Sparkles className="w-6 h-6" /></div>
+                                        <div className="flex items-center gap-3 md:gap-4">
+                                            <div className="bg-black/10 p-2 rounded-xl shrink-0"><Sparkles className="w-5 h-5 md:w-6 md:h-6" /></div>
                                             <div className="text-left">
-                                                <div className="text-lg">Any Professional</div>
-                                                <div className="text-xs opacity-75 font-normal">Fastest service (Recommended)</div>
+                                                <div className="text-base md:text-lg leading-tight">Any Professional</div>
+                                                <div className="text-[10px] md:text-xs opacity-75 font-normal">Fastest service (Recommended)</div>
                                             </div>
                                         </div>
                                         <ArrowLeft className="w-5 h-5 rotate-180 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </button>
 
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                         {(selectedGender === "Male" ? ["Ali", "Hassan", "Ahmed"] : ["Sarah", "Fatima"]).map((name) => (
                                             <button
                                                 key={name}
                                                 onClick={() => { form.setValue("barber", name); nextStep(); }}
                                                 className="p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 rounded-2xl transition-all flex flex-col items-center gap-2 text-center"
                                             >
-                                                <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center text-lg font-bold text-slate-300">
+                                                <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-700 rounded-full flex items-center justify-center text-lg font-bold text-slate-300">
                                                     {name[0]}
                                                 </div>
-                                                <span className="font-bold text-white">{name}</span>
+                                                <span className="font-bold text-white text-sm">{name}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -317,7 +319,7 @@ export default function BookingPage() {
                                         {/* Services */}
                                         <div className="space-y-3">
                                             <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Select Service</label>
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-2 gap-2 md:gap-3">
                                                 {(selectedGender === "Male"
                                                     ? [
                                                         { id: "Haircut", label: "Haircut" },
@@ -339,7 +341,7 @@ export default function BookingPage() {
                                                             type="button"
                                                             onClick={() => form.setValue("service", item.id as any)}
                                                             className={clsx(
-                                                                "p-3 rounded-xl border text-sm font-bold transition-all",
+                                                                "p-3 rounded-xl border text-xs md:text-sm font-bold transition-all h-12 md:h-auto flex items-center justify-center text-center leading-tight",
                                                                 isSelected
                                                                     ? "bg-amber-500 text-black border-amber-500"
                                                                     : "bg-slate-950/50 text-slate-400 border-slate-800 hover:bg-slate-900"
@@ -355,24 +357,27 @@ export default function BookingPage() {
                                         {/* Inputs */}
                                         <div className="space-y-4">
                                             <div className="space-y-2">
-                                                <input {...form.register("name")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none" placeholder="Your Name" />
+                                                <input {...form.register("name")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none text-sm md:text-base placeholder:text-slate-600" placeholder="Your Full Name" />
                                                 {form.formState.errors.name && <p className="text-red-400 text-xs">{form.formState.errors.name.message}</p>}
                                             </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <input {...form.register("phone")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none" placeholder="Phone (Optional)" />
-                                                <input {...form.register("email")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none" placeholder="Email (Gmail/Outlook)" />
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <input {...form.register("phone")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none text-sm md:text-base placeholder:text-slate-600" placeholder="Phone (Optional)" type="tel" />
+                                                <div>
+                                                    <input {...form.register("email")} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl h-12 px-4 text-white focus:border-amber-500 outline-none text-sm md:text-base placeholder:text-slate-600" placeholder="Email" type="email" />
+                                                    {form.formState.errors.email && <p className="text-red-400 text-xs mt-1">{form.formState.errors.email.message}</p>}
+                                                </div>
                                             </div>
-                                            {form.formState.errors.email && <p className="text-red-400 text-xs">{form.formState.errors.email.message}</p>}
                                         </div>
 
                                         <Button
                                             type="submit"
                                             variant="premium"
-                                            className="w-full h-14 text-base font-bold rounded-2xl shadow-xl shadow-amber-500/10"
+                                            className="w-full h-14 text-base font-bold rounded-2xl shadow-xl shadow-amber-500/10 mt-2"
                                             disabled={form.formState.isSubmitting}
                                         >
                                             {form.formState.isSubmitting ? "Processing..." : "Confirm Booking"}
                                         </Button>
+                                        <div className="h-4 md:hidden"></div> {/* Extra spacer for mobile scroll */}
                                     </form>
                                 </motion.div>
                             )}
