@@ -30,3 +30,13 @@ model Settings {
   shopName    String  @default("Premium Cuts")
   phone       String  @default("050 123 4567")
 }
+
+model Service {
+  id        Int      @id @default(autoincrement())
+  name      String
+  duration  Int      @default(30)
+  price     Float    @default(0)
+  category  String   @default("Male") // Male, Female, Both
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

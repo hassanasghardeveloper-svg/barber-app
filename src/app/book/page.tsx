@@ -41,6 +41,7 @@ export default function BookingPage() {
     const [isShopClosed, setIsShopClosed] = useState(false);
     const [loadingSettings, setLoadingSettings] = useState(true);
     const [shopPhone, setShopPhone] = useState("");
+    const [services, setServices] = useState<any[]>([]);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -59,38 +60,43 @@ export default function BookingPage() {
     const selectedGender = form.watch("gender");
 
     useEffect(() => {
-        async function checkSettings() {
+        async function fetchData() {
             try {
-                const res = await fetch('/api/settings');
-                if (res.ok) {
-                    const settings = await res.json();
+                // Fetch Settings
+                const settingsRes = await fetch('/api/settings');
+                if (settingsRes.ok) {
+                    const settings = await settingsRes.json();
                     if (settings.phone) setShopPhone(settings.phone);
 
-                    // Check if manually closed
                     if (settings.isQueueOpen === false) {
                         setIsShopClosed(true);
                         setLoadingSettings(false);
                         return;
                     }
-
-                    // Check time
                     if (settings.closeTime) {
                         const now = new Date();
                         const [hours, minutes] = settings.closeTime.split(':').map(Number);
                         const closeTime = new Date();
                         closeTime.setHours(hours, minutes, 0);
-                        if (now > closeTime) {
-                            setIsShopClosed(true);
-                        }
+                        if (now > closeTime) setIsShopClosed(true);
+                    }
+                }
+
+                // Fetch Services
+                const servicesRes = await fetch('/api/services');
+                if (servicesRes.ok) {
+                    const data = await servicesRes.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        setServices(data);
                     }
                 }
             } catch (error) {
-                console.error("Error fetching settings:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setLoadingSettings(false);
             }
         }
-        checkSettings();
+        fetchData();
     }, []);
 
     async function onSubmit(values: FormValues) {
@@ -337,22 +343,25 @@ export default function BookingPage() {
                                 <motion.div key="step3" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col flex-grow h-full">
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full gap-4">
                                         {/* Services */}
-                                        <div className="space-y-2 shrink-0">
+                                        <div className="space-y-3 shrink-0">
                                             <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Select Service</label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {(selectedGender === "Male"
-                                                    ? [
-                                                        { id: "Haircut", label: "Haircut" },
-                                                        { id: "Beard", label: "Beard Trim" },
-                                                        { id: "Both", label: "Full Package" },
-                                                        { id: "Facial", label: "Facial" }
-                                                    ]
-                                                    : [
-                                                        { id: "Haircut", label: "Haircut" },
-                                                        { id: "BlowDry", label: "Blow Dry" },
-                                                        { id: "Styling", label: "Hair Styling" },
-                                                        { id: "Treatment", label: "Treatment" }
-                                                    ]
+                                            <div className="grid grid-cols-2 gap-2 md:gap-3">
+                                                {(services.length > 0
+                                                    ? services.filter(s => s.category === selectedGender || s.category === 'Both' || s.category === 'General').map(s => ({ id: s.name, label: s.name }))
+                                                    : (selectedGender === "Male"
+                                                        ? [
+                                                            { id: "Haircut", label: "Haircut" },
+                                                            { id: "Beard", label: "Beard Trim" },
+                                                            { id: "Both", label: "Full Package" },
+                                                            { id: "Facial", label: "Facial" }
+                                                        ]
+                                                        : [
+                                                            { id: "Haircut", label: "Haircut" },
+                                                            { id: "BlowDry", label: "Blow Dry" },
+                                                            { id: "Styling", label: "Hair Styling" },
+                                                            { id: "Treatment", label: "Treatment" }
+                                                        ]
+                                                    )
                                                 ).map((item) => {
                                                     const isSelected = form.watch("service") === item.id;
                                                     return (
@@ -361,7 +370,7 @@ export default function BookingPage() {
                                                             type="button"
                                                             onClick={() => form.setValue("service", item.id as any)}
                                                             className={clsx(
-                                                                "p-3 rounded-xl border text-xs md:text-sm font-bold transition-all h-12 flex items-center justify-center text-center leading-tight",
+                                                                "p-3 rounded-xl border text-xs md:text-sm font-bold transition-all h-12 md:h-auto flex items-center justify-center text-center leading-tight",
                                                                 isSelected
                                                                     ? "bg-amber-500 text-black border-amber-500"
                                                                     : "bg-slate-950/50 text-slate-400 border-slate-800 hover:bg-slate-900"

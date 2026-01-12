@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import StatsCard from "@/components/StatsCard";
 import AdminTable, { Appointment } from "@/components/AdminTable";
+import ServicesManager from "@/components/ServicesManager";
 import { Users, Timer, BadgeCheck, UserX, Armchair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -143,6 +144,10 @@ const AdminDashboard = () => {
         }
     };
 
+    const [activeTab, setActiveTab] = useState<'queue' | 'services' | 'settings'>('queue');
+
+    // ... (rest of the handleUpdateStatus and handleNextCustomer logic)
+
     return (
         <main className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
 
@@ -174,22 +179,63 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatsCard title="Waiting" value={waitingCount} icon={Timer} trend="Peak time" trendUp={false} color="amber" />
-                <StatsCard title="Completed" value={doneCount} icon={BadgeCheck} color="green" />
-                <StatsCard title="Total Visits" value={todayTotal} icon={Users} trend="+12%" trendUp={true} color="blue" />
-                <StatsCard title="No-Shows" value={0} icon={UserX} trend="Low" trendUp={true} />
+            {/* Navigation Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-2">
+                {[
+                    { id: 'queue', label: 'Live Queue', icon: Timer },
+                    { id: 'services', label: 'Services Menu', icon: BadgeCheck },
+                    { id: 'settings', label: 'Settings', icon: UserX } // Using UserX as placeholder, update if needed
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap
+                            ${activeTab === tab.id
+                                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                                : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+                    >
+                        <tab.icon className="w-4 h-4" />
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
-            <div className="space-y-4">
-                <h2 className="text-xl font-bold text-white px-2">Queue Management</h2>
-                {loading ? (
-                    <div className="text-center p-12 text-slate-500">Loading appointments...</div>
-                ) : (
-                    <AdminTable appointments={appointments} onUpdateStatus={handleUpdateStatus} />
-                )}
-            </div>
+            {/* Tab Content */}
+            {activeTab === 'queue' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <StatsCard title="Waiting" value={waitingCount} icon={Timer} trend="Peak time" trendUp={false} color="amber" />
+                        <StatsCard title="Completed" value={doneCount} icon={BadgeCheck} color="green" />
+                        <StatsCard title="Total Visits" value={todayTotal} icon={Users} trend="+12%" trendUp={true} color="blue" />
+                        <StatsCard title="No-Shows" value={0} icon={UserX} trend="Low" trendUp={true} />
+                    </div>
+
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-bold text-white px-2">Queue Management</h2>
+                        {loading ? (
+                            <div className="text-center p-12 text-slate-500">Loading appointments...</div>
+                        ) : (
+                            <AdminTable appointments={appointments} onUpdateStatus={handleUpdateStatus} />
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'services' && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <ServicesManager />
+                </div>
+            )}
+
+            {activeTab === 'settings' && (
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <p className="text-slate-500 mb-4">You can manage shop hours and general settings here.</p>
+                    <Button variant="outline" onClick={() => window.location.href = '/admin/settings'}>
+                        Go to Advanced Settings Page
+                    </Button>
+                </div>
+            )}
 
         </main>
     );
