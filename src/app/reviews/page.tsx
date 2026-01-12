@@ -24,7 +24,7 @@ export default function ReviewsPage() {
     };
 
     return (
-        <main className="min-h-screen bg-slate-950 pt-32 pb-20">
+        <main className="min-h-screen bg-neutral-950 pt-32 pb-20">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -42,29 +42,29 @@ export default function ReviewsPage() {
                             <div className="flex text-amber-500">
                                 <Star className="fill-current w-6 h-6" /><Star className="fill-current w-6 h-6" /><Star className="fill-current w-6 h-6" /><Star className="fill-current w-6 h-6" /><Star className="fill-current w-6 h-6" />
                             </div>
-                            <span className="text-sm text-slate-400 font-normal uppercase tracking-widest">Based on 500+ Reviews</span>
+                            <span className="text-sm text-neutral-400 font-normal uppercase tracking-widest">Based on 500+ Reviews</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {reviews.map((review, i) => (
-                        <div key={i} className="bg-slate-900 border border-slate-800 p-8 rounded-3xl relative">
+                        <div key={i} className="bg-neutral-900 border border-white/5 p-8 rounded-3xl relative">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-slate-400">
+                                    <div className="w-10 h-10 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-400">
                                         <User className="w-5 h-5" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-white">{review.name}</h4>
-                                        <p className="text-xs text-slate-500">{review.date}</p>
+                                        <p className="text-xs text-neutral-500">{review.date}</p>
                                     </div>
                                 </div>
                                 <div className="flex text-amber-500 gap-0.5">
                                     {[...Array(review.rating)].map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
                                 </div>
                             </div>
-                            <p className="text-slate-300 leading-relaxed">"{review.text}"</p>
+                            <p className="text-neutral-300 leading-relaxed">"{review.text}"</p>
                         </div>
                     ))}
                 </div>
