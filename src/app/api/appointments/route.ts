@@ -70,8 +70,10 @@ export async function POST(req: Request) {
                 email,
                 gender,
                 barber,
+                appointmentDate: body.appointmentDate,
+                appointmentTime: body.appointmentTime,
                 queueNumber: nextQueueNum,
-                status: 'Waiting'
+                status: 'Scheduled'
             }
         });
         console.log("Appointment created in DB:", newAppointment);

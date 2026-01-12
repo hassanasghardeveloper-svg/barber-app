@@ -16,8 +16,10 @@ model Appointment {
   email       String?
   gender      String?
   barber      String?
-  status      String   @default("Waiting") // Waiting, Serving, Done, NoShow
-  queueNumber Int
+  appointmentDate String?  // Check YYYY-MM-DD
+  appointmentTime String?  // Check HH:mm
+  status      String   @default("Scheduled") // Scheduled, Serving, Done, NoShow
+  queueNumber Int?     @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
