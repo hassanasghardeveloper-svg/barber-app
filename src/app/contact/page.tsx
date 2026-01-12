@@ -1,82 +1,84 @@
 import { Button } from "@/components/ui/button";
-import { Mail, MapPin, Phone, Clock } from "lucide-react";
-import Link from "next/link";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
 
 export default function ContactPage() {
     return (
-        <main className="min-h-screen bg-slate-950 pt-32 pb-20">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-6xl font-bold text-white font-heading mb-4">
-                        Visit <span className="text-amber-500">Premium Cuts</span>
-                    </h1>
-                    <p className="text-slate-400">We are conveniently located in the heart of Sialkot.</p>
+        <main className="bg-neutral-950 min-h-screen pt-20">
+            {/* --- HERO HEADER --- */}
+            <section className="relative py-24 text-center bg-neutral-950 overflow-hidden">
+                <div className="relative z-10 px-6">
+                    <h2 className="text-amber-500 font-bold tracking-[0.4em] uppercase mb-4 text-sm">Location & Support</h2>
+                    <h1 className="text-5xl md:text-7xl font-black font-heading text-white uppercase tracking-tighter">Contact Us</h1>
+                    <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full mt-6" />
                 </div>
+            </section>
 
-                <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-                    {/* Info */}
-                    <div className="space-y-8">
-                        <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-6">
+            <section className="py-16 container mx-auto px-6">
+                <div className="grid md:grid-cols-2 gap-0 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+
+                    {/* Left: Contact Info & Form */}
+                    <div className="bg-neutral-900 p-12 md:p-16">
+                        <h2 className="text-3xl font-black text-white uppercase mb-8">Get In Touch</h2>
+
+                        <div className="space-y-6 mb-12">
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
+                                <div className="p-3 bg-neutral-800 rounded-lg text-amber-500">
                                     <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white mb-2">Location</h3>
-                                    <p className="text-slate-400 leading-relaxed">
-                                        Paris Road, Near City Hardware,<br />
-                                        Sialkot, Pakistan 51310
-                                    </p>
+                                    <h4 className="text-white font-bold uppercase">Sialkot Downtown</h4>
+                                    <p className="text-neutral-400">Paris Road, Sialkot 51310, Pakistan</p>
                                 </div>
                             </div>
-
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
+                                <div className="p-3 bg-neutral-800 rounded-lg text-amber-500">
                                     <Phone className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white mb-2">Contact</h3>
-                                    <p className="text-slate-400">
-                                        +92 300 1234567<br />
-                                        booking@premiumcuts.com
-                                    </p>
+                                    <h4 className="text-white font-bold uppercase">Phone</h4>
+                                    <p className="text-neutral-400">+92 300 1234567</p>
                                 </div>
                             </div>
-
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
-                                    <Clock className="w-6 h-6" />
+                                <div className="p-3 bg-neutral-800 rounded-lg text-amber-500">
+                                    <Mail className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white mb-2">Hours</h3>
-                                    <div className="text-slate-400 space-y-1">
-                                        <p className="flex justify-between w-48"><span>Mon - Sat:</span> <span className="text-white">10:00 AM - 10:00 PM</span></p>
-                                        <p className="flex justify-between w-48"><span>Sunday:</span> <span className="text-white">12:00 PM - 9:00 PM</span></p>
-                                    </div>
+                                    <h4 className="text-white font-bold uppercase">Email</h4>
+                                    <p className="text-neutral-400">booking@premiumcuts.pk</p>
                                 </div>
                             </div>
                         </div>
 
-                        <Link href="/book" className="block">
-                            <Button size="lg" className="w-full h-14 bg-white text-black hover:bg-amber-500 font-bold rounded-2xl text-lg">
-                                Book an Appointment Now
+                        <form className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <input placeholder="First Name" className="w-full bg-neutral-800 border border-neutral-700 h-12 px-4 text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none rounded-md" />
+                                <input placeholder="Last Name" className="w-full bg-neutral-800 border border-neutral-700 h-12 px-4 text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none rounded-md" />
+                            </div>
+                            <input placeholder="Email Address" className="w-full bg-neutral-800 border border-neutral-700 h-12 px-4 text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none rounded-md" />
+                            <textarea placeholder="Message" className="w-full bg-neutral-800 border border-neutral-700 min-h-[120px] p-4 text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none rounded-md" />
+                            <Button className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase tracking-widest rounded-none">
+                                Send Message
                             </Button>
-                        </Link>
+                        </form>
                     </div>
 
-                    {/* Map Placeholder */}
-                    <div className="h-full min-h-[400px] bg-slate-800 rounded-3xl overflow-hidden grayscale invert border border-slate-700 relative group">
-                        {/* Embed Google Map here in production */}
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d108000.0!2d74.5!3d32.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391f1e0955555555%3A0x1234567890abcdef!2sSialkot%2C%20Punjab%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
-                            width="100%"
-                            height="100%"
-                            loading="lazy"
-                            className="absolute inset-0 border-0"
-                        ></iframe>
+                    {/* Right: Map */}
+                    <div className="relative min-h-[500px] bg-neutral-800">
+                        <img
+                            src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=2000&q=80"
+                            alt="Map Location"
+                            className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="relative">
+                                <div className="w-4 h-4 bg-amber-500 rounded-full animate-ping absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                <MapPin className="w-12 h-12 text-amber-500 relative z-10 filter drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </main>
     );
 }

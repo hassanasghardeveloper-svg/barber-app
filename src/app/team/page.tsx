@@ -1,104 +1,67 @@
-import { Button } from "@/components/ui/button";
-import { Instagram, Star } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { Instagram, Twitter } from "lucide-react";
 
 export default function TeamPage() {
     const barbers = [
         {
-            name: "Ali Hassan",
-            role: "Master Barber",
-            specialty: "Skin Fades & Beards",
-            experience: "12 Years",
-            image: "https://images.unsplash.com/photo-1580518337843-f959e992563b?w=800&q=80",
-            instagram: "ali_cuts"
+            name: "Muneeb",
+            role: "Owner / Master Barber",
+            image: "https://images.unsplash.com/photo-1580518337843-f959e992563b?w=600&h=800&fit=crop",
+            specialty: "Precision Fades & Beards"
         },
         {
-            name: "Zain Ahmed",
+            name: "Jordan",
             role: "Senior Stylist",
-            specialty: "Scissor Cuts & Styling",
-            experience: "8 Years",
-            image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800&q=80",
-            instagram: "zain_style"
+            image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&h=800&fit=crop",
+            specialty: "Scissor Cuts & Texture"
         },
         {
-            name: "Bilal Khan",
-            role: "Grooming Expert",
-            specialty: "Hot Towel Shaves",
-            experience: "15 Years",
-            image: "https://images.unsplash.com/photo-1599351431202-6e0c051cd1a0?w=800&q=80",
-            instagram: "bk_barber"
+            name: "Davies",
+            role: "Barber",
+            image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=800&fit=crop",
+            specialty: "Classic Gentleman Cuts"
+        },
+        {
+            name: "Haroon",
+            role: "Stylist",
+            image: "https://images.unsplash.com/photo-1599351431202-6e0c051cd1a0?w=600&h=800&fit=crop",
+            specialty: "Hot Towel Shaves"
         }
     ];
 
-    const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": "BarberShop",
-        "name": "Premium Cuts Sialkot",
-        "employees": barbers.map(b => ({
-            "@type": "Person",
-            "name": b.name,
-            "jobTitle": b.role,
-            "knowsAbout": b.specialty
-        }))
-    };
-
     return (
-        <main className="min-h-screen bg-slate-950 pt-32 pb-20">
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-16 space-y-4">
-                    <h1 className="text-4xl md:text-6xl font-bold text-white font-heading">
-                        Meet The <span className="text-amber-500">Masters</span>
-                    </h1>
-                    <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                        The talented hands behind your new look. Our team combines decades of experience with modern techniques.
-                    </p>
+        <main className="bg-neutral-950 min-h-screen pt-20">
+            {/* --- HERO HEADER --- */}
+            <section className="relative py-24 text-center bg-neutral-950 overflow-hidden">
+                <div className="relative z-10 px-6">
+                    <h2 className="text-amber-500 font-bold tracking-[0.4em] uppercase mb-4 text-sm">Expert Staff</h2>
+                    <h1 className="text-5xl md:text-7xl font-black font-heading text-white uppercase tracking-tighter">Our Team</h1>
+                    <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full mt-6" />
                 </div>
+            </section>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <section className="py-16 container mx-auto px-6">
+                <div className="grid md:grid-cols-4 gap-8">
                     {barbers.map((barber, i) => (
-                        <div key={i} className="group relative bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-amber-500/50 transition-all duration-500">
-                            {/* Image Placeholder - In real app use local images or reliable URLs */}
-                            <div className="h-96 w-full relative grayscale group-hover:grayscale-0 transition-all duration-700">
-                                <img
-                                    src={barber.image}
-                                    alt={barber.name}
-                                    className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-90" />
+                        <div key={i} className="group relative bg-neutral-900 border border-white/5 rounded-xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-2">
+                            {/* Image Container */}
+                            <div className="aspect-[3/4] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+                                <img src={barber.image} alt={barber.name} className="w-full h-full object-cover" />
                             </div>
 
-                            <div className="absolute bottom-0 left-0 w-full p-8">
-                                <div className="mb-4">
-                                    <h3 className="text-2xl font-bold text-white mb-1">{barber.name}</h3>
-                                    <p className="text-amber-500 font-medium tracking-wide">{barber.role}</p>
-                                </div>
-
-                                <div className="space-y-2 text-sm text-slate-400 mb-6">
-                                    <p className="flex items-center gap-2"><Star className="w-4 h-4 text-amber-500" /> {barber.specialty}</p>
-                                    <p className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold">XP</div> {barber.experience}</p>
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <Link href="/book">
-                                        <Button className="w-full bg-white text-black hover:bg-amber-500 font-bold">
-                                            Book {barber.name.split(' ')[0]}
-                                        </Button>
-                                    </Link>
-                                    <Button size="icon" variant="outline" className="border-slate-700 text-slate-400 hover:text-white hover:border-white">
-                                        <Instagram className="w-4 h-4" />
-                                    </Button>
+                            {/* Info */}
+                            <div className="p-6 text-center bg-gradient-to-t from-neutral-950 to-neutral-900">
+                                <h3 className="text-2xl font-black text-white uppercase mb-1">{barber.name}</h3>
+                                <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-4">{barber.role}</p>
+                                <div className="w-8 h-0.5 bg-white/20 mx-auto mb-4" />
+                                <div className="flex justify-center gap-4 text-neutral-500">
+                                    <Instagram className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
+                                    <Twitter className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
-            </div>
+            </section>
         </main>
     );
 }
