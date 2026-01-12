@@ -173,6 +173,25 @@ export default function BookingPage() {
 
     // --- Success State ---
     if (isSubmitted && queueData) {
+
+        // Helper to ensure phone number format is International
+        const formatShopPhone = (phone: string) => {
+            let clean = phone.replace(/\D/g, ''); // Remove all non-digits
+            // If it starts with '03', likely Pakistan local format: replace '0' with '92'
+            if (clean.startsWith('03')) {
+                clean = '92' + clean.substring(1);
+            }
+            // If it's still missing '92' but is 10 digits (e.g. 3001234567), prepend 92
+            if (clean.length === 10 && !clean.startsWith('92')) {
+                clean = '92' + clean;
+            }
+            return clean;
+        };
+
+        const whatsappLink = shopPhone
+            ? `https://wa.me/${formatShopPhone(shopPhone)}?text=${encodeURIComponent(`Hi, I just booked appointment #${queueData.number} for ${form.getValues("name")}.`)}`
+            : "";
+
         return (
             <main className="flex-grow flex items-center justify-center p-4 min-h-[600px]">
                 <div className="max-w-md w-full bg-slate-900/40 backdrop-blur-2xl border border-slate-800/80 rounded-[2rem] p-8 shadow-2xl text-center relative overflow-hidden">
@@ -194,10 +213,7 @@ export default function BookingPage() {
                     </div>
                     {shopPhone && (
                         <Button
-                            onClick={() => {
-                                const message = `Hi, I just booked appointment #${queueData.number} for ${form.getValues("name")}.`;
-                                window.open(`https://wa.me/${shopPhone}?text=${encodeURIComponent(message)}`, '_blank');
-                            }}
+                            onClick={() => window.open(whatsappLink, '_blank')}
                             className="w-full mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl"
                         >
                             <MessageCircle className="w-5 h-5 mr-2" /> Send to WhatsApp
