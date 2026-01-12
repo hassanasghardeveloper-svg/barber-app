@@ -24,7 +24,7 @@ export default function Home() {
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight font-heading text-white leading-[1.1]">
                         Best Barber Shop <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-500 to-amber-600">
-                            in New York City
+                            in Sialkot
                         </span>
                     </h1>
 
