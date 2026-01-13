@@ -4,33 +4,39 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Appointment {
-  id          Int      @id @default(autoincrement())
-  name        String
-  phone       String?
-  service     String
-  email       String?
-  gender      String?
-  barber      String?
-  appointmentDate String?  // Check YYYY-MM-DD
-  appointmentTime String?  // Check HH:mm
-  status      String   @default("Scheduled") // Scheduled, Serving, Done, NoShow
-  queueNumber Int?     @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  name            String
+  phone           String?
+  service         String
+  email           String?
+  gender          String?
+  barber          String?
+  appointmentDate String?  
+  appointmentTime String?  
+  status          String   @default("Scheduled") // Scheduled, Serving, Done, Canceled, NoShow
+  queueNumber     Int?     @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Settings {
-  id          Int     @id @default(autoincrement())
-  openTime    String  @default("09:00")
-  closeTime   String  @default("22:00")
-  isQueueOpen Boolean @default(true)
-  shopName    String  @default("Premium Cuts")
-  phone       String  @default("050 123 4567")
+  id             Int     @id @default(autoincrement())
+  openTime       String  @default("10:00")
+  closeTime      String  @default("22:00")
+  isQueueOpen    Boolean @default(true)
+  shopName       String  @default("Premium Cuts")
+  phone          String  @default("050 123 4567")
+  location       String  @default("Sialkot")
+  
+  // CMS Fields
+  heroTitle      String  @default("Best Barber Shop")
+  heroSubtitle   String  @default("Where traditional mastery meets modern style.")
+  announcement   String? 
 }
 
 model Service {
@@ -38,7 +44,28 @@ model Service {
   name      String
   duration  Int      @default(30)
   price     Float    @default(0)
-  category  String   @default("Male") // Male, Female, Both
+  category  String   @default("Male") 
+  image     String?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Barber {
+  id          Int      @id @default(autoincrement())
+  name        String
+  image       String?
+  isActive    Boolean  @default(true)
+  specialty   String?  // e.g. "Fade Specialist"
+  workingDays String   @default("Mon,Tue,Wed,Thu,Fri,Sat,Sun")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Hashed
+  role      String   @default("EDITOR") // SUPER_ADMIN, EDITOR
+  createdAt DateTime @default(now())
 }

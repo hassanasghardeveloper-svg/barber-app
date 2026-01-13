@@ -36,13 +36,13 @@ export default function Home() {
 
                     <div className="pt-8 flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center w-full px-6 md:px-0">
                         <Link href="/book" className="w-full sm:w-auto">
-                            <Button className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-12 bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg md:text-xl uppercase tracking-widest rounded-none border-2 border-amber-500 transition-all hover:scale-105">
-                                Book Now
+                            <Button className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-12 bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg md:text-xl uppercase tracking-widest rounded-none border-2 border-amber-500 transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                                Book Appointment
                             </Button>
                         </Link>
-                        <Link href="/services" className="w-full sm:w-auto">
-                            <Button variant="outline" className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-12 border-2 border-white text-white hover:bg-white hover:text-black font-bold text-lg md:text-xl uppercase tracking-widest rounded-none transition-all bg-transparent">
-                                View Menu
+                        <Link href="/status" className="w-full sm:w-auto">
+                            <Button variant="outline" className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-12 border-2 border-white text-white hover:bg-white hover:text-black font-bold text-lg md:text-xl uppercase tracking-widest rounded-none transition-all bg-transparent backdrop-blur-sm">
+                                Check Queue Status
                             </Button>
                         </Link>
                     </div>
