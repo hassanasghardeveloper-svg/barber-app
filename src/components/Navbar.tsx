@@ -64,7 +64,7 @@ export default function Navbar() {
 
             {/* --- MOBILE MENU OVERLAY --- */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 top-20 md:top-28 bottom-0 bg-black z-50 flex flex-col items-center pt-12 space-y-8 md:hidden border-t border-white/10 overflow-y-auto">
+                <div className="fixed top-20 md:top-28 left-0 right-0 bottom-0 bg-black z-50 flex flex-col items-center pt-12 space-y-8 md:hidden border-t border-white/10 overflow-y-auto">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
