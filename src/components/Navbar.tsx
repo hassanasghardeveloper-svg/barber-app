@@ -23,8 +23,8 @@ export default function Navbar() {
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
     return (
-        <nav className="fixed top-0 z-50 w-full bg-neutral-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl transition-all duration-300">
-            <div className="container mx-auto px-6 h-28 flex items-center justify-between md:justify-center relative">
+        <nav className="fixed top-0 z-[100] w-full bg-neutral-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl transition-all duration-300">
+            <div className="container mx-auto px-6 h-20 md:h-28 flex items-center justify-between md:justify-center relative">
 
                 {/* --- MOBILE: Hamburger Button --- */}
                 <div className="md:hidden">
@@ -64,7 +64,7 @@ export default function Navbar() {
 
             {/* --- MOBILE MENU OVERLAY --- */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 top-28 bottom-0 bg-black z-40 flex flex-col items-center pt-12 space-y-8 animate-in slide-in-from-top-10 duration-200 md:hidden border-t border-white/10 overflow-y-auto">
+                <div className="fixed inset-0 top-20 md:top-28 bottom-0 bg-black z-40 flex flex-col items-center pt-12 space-y-8 animate-in slide-in-from-top-10 duration-200 md:hidden border-t border-white/10 overflow-y-auto">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
