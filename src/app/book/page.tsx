@@ -37,28 +37,33 @@ const stepVariants: Variants = {
     exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
 };
 
-// --- HARDCODED SERVICES PER USER REQUEST ---
-const MALE_SERVICES = [
-    { id: "Signature Haircut", label: "Signature Haircut - $30" },
-    { id: "Skin Fade", label: "Skin Fade - $35" },
-    { id: "Beard Sculpt & Shape", label: "Beard Sculpt & Shape - $25" },
-    { id: "Hot Towel Shave", label: "Hot Towel Shave - $40" },
-    { id: "The Full Works", label: "The Full Works - $65" },
-];
-
-const FEMALE_SERVICES = [
-    { id: "Style Cut & Finish", label: "Style Cut & Finish - $45" },
-    { id: "Dry Cut", label: "Dry Cut - $35" },
-    { id: "Fringe Trim", label: "Fringe Trim - $15" },
-    { id: "Blow Dry & Style", label: "Blow Dry & Style - $40" },
-    { id: "Color Consultation", label: "Color Consultation - Free" },
-];
+// Data fetched dynamically now
 
 export default function BookingPage() {
     const [step, setStep] = useState(1);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [queueData, setQueueData] = useState<{ number: number; waitTime: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [barbers, setBarbers] = useState<any[]>([]);
+    const [services, setServices] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [bRes, sRes] = await Promise.all([
+                    fetch('/api/barbers'),
+                    fetch('/api/services')
+                ]);
+                const bData = await bRes.json();
+                const sData = await sRes.json();
+                if (Array.isArray(bData)) setBarbers(bData);
+                if (Array.isArray(sData)) setServices(sData);
+            } catch (e) {
+                console.error("Failed to load booking data");
+            }
+        };
+        fetchData();
+    }, []);
 
     // Form Setup
     const form = useForm<FormValues>({
@@ -202,7 +207,7 @@ export default function BookingPage() {
                                 </motion.div>
                             )}
 
-                            {/* STEP 2: BARBER */}
+                            {/* STEP 2: BARBER (Dynamic) */}
                             {step === 2 && (
                                 <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-4 flex-grow">
                                     <button onClick={() => { form.setValue("barber", "Any Professional"); nextStep(); }} className="w-full p-6 bg-amber-500 text-black font-bold rounded-2xl flex items-center gap-4 hover:brightness-110 transition-all">
@@ -214,13 +219,20 @@ export default function BookingPage() {
                                     </button>
 
                                     <div className="grid grid-cols-2 gap-3 mt-4">
-                                        {(selectedGender === "Male" ? ["Ali", "Hassan", "Ahmed"] : ["Sarah", "Fatima"]).map((name) => (
-                                            <button key={name} onClick={() => { form.setValue("barber", name); nextStep(); }} className="p-4 bg-neutral-800 hover:bg-neutral-700 border border-white/5 rounded-xl flex flex-col items-center gap-3 transition-all">
-                                                <div className="w-10 h-10 bg-neutral-700 rounded-full flex items-center justify-center text-white font-bold">{name[0]}</div>
-                                                <span className="text-white font-bold text-sm">{name}</span>
+                                        {barbers.filter(b => b.isActive).map((b) => (
+                                            <button key={b.id} onClick={() => { form.setValue("barber", b.name); nextStep(); }} className="p-4 bg-neutral-800 hover:bg-neutral-700 border border-white/5 rounded-xl flex flex-col items-center gap-3 transition-all relative overflow-hidden group">
+                                                {/* Image Placeholder */}
+                                                <div className="w-12 h-12 bg-neutral-700 rounded-full flex items-center justify-center text-white font-bold text-lg group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                                    {b.image ? <img src={b.image} className="w-full h-full object-cover rounded-full" /> : b.name[0]}
+                                                </div>
+                                                <div className="text-center z-10">
+                                                    <span className="text-white font-bold text-sm block">{b.name}</span>
+                                                    <span className="text-[10px] text-neutral-400 uppercase tracking-wider">{b.specialty || 'Barber'}</span>
+                                                </div>
                                             </button>
                                         ))}
                                     </div>
+                                    {barbers.length === 0 && <p className="text-center text-neutral-500 text-sm">Loading barbers...</p>}
                                 </motion.div>
                             )}
 
@@ -275,21 +287,24 @@ export default function BookingPage() {
                                         <div className="space-y-3 mb-2">
                                             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider ml-1">Select Service</label>
                                             <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-2">
-                                                {(selectedGender === "Male" ? MALE_SERVICES : FEMALE_SERVICES).map((svc) => (
-                                                    <button
-                                                        key={svc.id}
-                                                        type="button"
-                                                        onClick={() => form.setValue("service", svc.id)}
-                                                        className={clsx(
-                                                            "p-3 rounded-xl border text-sm font-bold text-left transition-all",
-                                                            form.watch("service") === svc.id
-                                                                ? "bg-amber-500 text-black border-amber-500"
-                                                                : "bg-neutral-800 text-neutral-400 border-white/5 hover:bg-neutral-700 hover:text-white"
-                                                        )}
-                                                    >
-                                                        {svc.label}
-                                                    </button>
-                                                ))}
+                                                <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-2">
+                                                    {services.filter(s => s.category === selectedGender || s.category === 'Both' || s.category === 'General').map((svc) => (
+                                                        <button
+                                                            key={svc.id}
+                                                            type="button"
+                                                            onClick={() => form.setValue("service", svc.name)}
+                                                            className={clsx(
+                                                                "p-3 rounded-xl border text-sm font-bold text-left transition-all flex justify-between",
+                                                                form.watch("service") === svc.name
+                                                                    ? "bg-amber-500 text-black border-amber-500"
+                                                                    : "bg-neutral-800 text-neutral-400 border-white/5 hover:bg-neutral-700 hover:text-white"
+                                                            )}
+                                                        >
+                                                            <span>{svc.name}</span>
+                                                            <span>${svc.price}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
 
