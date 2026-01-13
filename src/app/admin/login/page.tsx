@@ -11,12 +11,29 @@ export default function AdminLogin() {
     const [error, setError] = useState("");
     const router = useRouter();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (email === "admin@barber.com" && password === "admin") {
+        setError("");
+
+        try {
+            const res = await fetch("/api/admin/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Login failed");
+                return;
+            }
+
+            // Success
             router.push("/admin/dashboard");
-        } else {
-            setError("Invalid credentials.");
+            router.refresh(); // Refresh to update server components/middleware state
+        } catch (err) {
+            setError("Something went wrong");
         }
     };
 
