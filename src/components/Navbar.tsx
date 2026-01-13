@@ -22,6 +22,9 @@ export default function Navbar() {
 
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
+    // HIDE NAV ON ADMIN PAGES (To fix double header)
+    if (pathname.startsWith('/admin')) return null;
+
     return (
         <nav className="fixed top-0 z-[100] w-full bg-neutral-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl transition-all duration-300">
             <div className="container mx-auto px-6 h-20 md:h-28 flex items-center justify-between md:justify-center relative">
