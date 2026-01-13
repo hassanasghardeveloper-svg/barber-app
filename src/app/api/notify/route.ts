@@ -1,74 +1,89 @@
 import { NextResponse } from "next/server";
-import { sendEmail } from "@/lib/mail";
+import nodemailer from "nodemailer";
+
+// Configure Transport (Use environment variables in production)
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { type, email, name, queueNumber, waitTime } = body;
 
+        console.log(`[Notification System] Processing '${type}' for ${email}`);
+
+        // If no credentials, just mock the send
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.warn("[Notification System] SMTP credentials missing. Skipping actual email send.");
+            console.warn(`Simulated Email Content: Access Code/Queue: ${queueNumber} for ${name}`);
+            return NextResponse.json({ success: true, mocked: true });
+        }
+
         let subject = "";
         let html = "";
 
-        if (type === "confirmation") {
-            subject = `Booking Confirmation - #${queueNumber}`;
+        if (type === 'confirmation') {
+            subject = "Booking Confirmed - Premium Cuts";
             html = `
-            <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                <h1 style="color: #d97706;">Booking Confirmed!</h1>
-                <p>Hi ${name},</p>
-                <p>You have successfully joined the queue at <strong>Premium Cuts</strong>.</p>
-                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <p style="margin: 0; font-size: 14px; color: #6b7280;">QUEUE NUMBER</p>
-                    <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold; color: #000;">#${queueNumber}</p>
-                    <br/>
-                     <p style="margin: 0; font-size: 14px; color: #6b7280;">ESTIMATED WAIT</p>
-                    <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold; color: #3b82f6;">${waitTime}</p>
+                <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                    <h1 style="color: #d97706;">Booking Confirmed!</h1>
+                    <p>Hi <b>${name}</b>,</p>
+                    <p>Your appointment has been successfully booked.</p>
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 10px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 14px; color: #666;">YOUR TICKET NUMBER</p>
+                        <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold; color: #000;">#${queueNumber}</p>
+                        <p style="margin: 10px 0 0 0; font-size: 16px;">Time: <b>${waitTime || 'Check Status'}</b></p>
+                    </div>
+                    <p>Please arrive 5 minutes early.</p>
+                    <p>Regards,<br/>Premium Cuts Team</p>
                 </div>
-                <p>Please arrive 10 minutes before your turn.</p>
-                <a href="https://barber-app-5hdo.vercel.app/status" style="display: inline-block; background: #d97706; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Check Live Status</a>
-            </div>
-        `;
-        } else if (type === "notification") {
-            subject = `It's Your Turn! - #${queueNumber}`;
+            `;
+        } else if (type === 'notification') {
+            // "You are next" or similar
+            subject = "It's Your Turn! - Premium Cuts";
             html = `
-             <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                <h1 style="color: #22c55e;">You're Next!</h1>
-                <p>Hi ${name},</p>
-                <p>The chair is ready for you.</p>
-                <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
-                    <p style="margin: 0; font-size: 18px;">Please come to the shop immediately!</p>
+                <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                    <h1 style="color: #16a34a;">You're Up Next!</h1>
+                    <p>Hi <b>${name}</b>,</p>
+                    <p>The barber is ready for you. Please head to the shop immediately.</p>
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 10px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 14px; color: #666;">TICKET NUMBER</p>
+                        <p style="margin: 5px 0 0 0; font-size: 32px; font-weight: bold; color: #000;">#${queueNumber}</p>
+                    </div>
                 </div>
-            </div>
-        `;
-        } else if (type === "cancellation") {
-            subject = `Missed Appointment - #${queueNumber}`;
+            `;
+        } else if (type === 'cancellation') {
+            subject = "Appointment Canceled - Premium Cuts";
             html = `
-             <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                <h1 style="color: #ef4444;">You Missed Your Turn</h1>
-                <p>Hi ${name},</p>
-                <p>We called you but you were not present within 15 minutes.</p>
-                <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
-                    <p style="margin: 0; font-size: 18px;">Your appointment has been cancelled.</p>
+                <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                    <h1 style="color: #dc2626;">Booking Canceled</h1>
+                    <p>Hi <b>${name}</b>,</p>
+                    <p>Your appointment (Ticket #${queueNumber}) has been marked as cancelled or No-Show.</p>
+                    <p>If this was a mistake, please contact us.</p>
                 </div>
-                <p>Please book a new appointment if you still wish to visit.</p>
-                 <a href="https://barber-app-5hdo.vercel.app/" style="display: inline-block; background: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Book Again</a>
-            </div>
-        `;
+             `;
         }
 
-        // Since we don't have a real email field in the simplified form, 
-        // we would normally look up the user's email or ask for it.
-        // For this 'Phone Number Only' app, we can't send email unless we ask for it.
-        // But the user asked "msg him through gmail", implying we HAVE the email.
+        const info = await transporter.sendMail({
+            from: '"Premium Cuts" <no-reply@premiumcuts.com>',
+            to: email,
+            subject: subject,
+            html: html,
+        });
 
-        // IF the user provided an email, we send it.
-        if (email && email.includes("@")) {
-            await sendEmail({ to: email, subject, html });
-            return NextResponse.json({ success: true, message: "Email sent" });
-        } else {
-            return NextResponse.json({ success: true, message: "No email provided, skipped" });
-        }
+        console.log(`[Notification System] Email sent: ${info.messageId}`);
+        return NextResponse.json({ success: true, messageId: info.messageId });
 
-    } catch (error) {
-        return NextResponse.json({ success: false, error: "Failed to send email" }, { status: 500 });
+    } catch (error: any) {
+        console.error("[Notification System] Error:", error);
+        // Fail gracefully so frontend doesn't break
+        return NextResponse.json({ error: "Failed to send email", details: error.message }, { status: 200 });
     }
 }
