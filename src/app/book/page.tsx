@@ -25,8 +25,8 @@ const formSchema = z.object({
     service: z.string(),
     gender: z.enum(["Male", "Female"]),
     barber: z.string(),
-    bookingDate: z.date({ required_error: "Please select a date" }),
-    bookingTime: z.string({ required_error: "Please select a time" }),
+    bookingDate: z.date(),
+    bookingTime: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -230,14 +230,14 @@ export default function BookingPage() {
                                     <div className="flex-grow overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
                                         <BookingCalendar
                                             selectedDate={selectedDate}
-                                            onDateSelect={(date) => form.setValue("bookingDate", date)}
+                                            onDateSelect={(date) => form.setValue("bookingDate", date, { shouldValidate: true, shouldDirty: true })}
                                         />
 
                                         {selectedDate && (
                                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                                 <TimeSlotPicker
                                                     selectedTime={selectedTime}
-                                                    onTimeSelect={(time) => form.setValue("bookingTime", time)}
+                                                    onTimeSelect={(time) => form.setValue("bookingTime", time, { shouldValidate: true, shouldDirty: true })}
                                                 />
                                             </div>
                                         )}
@@ -258,6 +258,18 @@ export default function BookingPage() {
                             {step === 4 && (
                                 <motion.div key="step4" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col flex-grow h-full">
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full gap-4">
+
+                                        {/* Error Message Display */}
+                                        {form.formState.errors.root && (
+                                            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3">
+                                                <div className="bg-red-500/20 p-2 rounded-full">
+                                                    <span className="text-red-500 font-bold block">!</span>
+                                                </div>
+                                                <p className="text-red-400 text-sm font-medium leading-tight">
+                                                    {form.formState.errors.root.message}
+                                                </p>
+                                            </div>
+                                        )}
 
                                         {/* Service Selection */}
                                         <div className="space-y-3 mb-2">
